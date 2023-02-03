@@ -1,0 +1,30 @@
+#include "MIDIcontroller.h"
+
+// This is an example of how to set up a capacitive touch
+// sensor as a MIDI input. Any capacitive object connected
+// to a 'touch' pin will work. If using metal, use a layer of 
+// something non-conductive between the metal and skin.
+
+byte MIDIChannel = 5;
+const int touchPin = 22; // Change this to the correct TOUCH pin
+
+// Parameters are: pin and CC number
+MIDItouch myInput1(touchPin, 60);
+
+void setup(){
+  // WARNING! if you use inputRange() with no arguments,
+  // the input range is calculated based on a call to
+  // touchRead() so DON'T touch the input during setup()
+  myInput1.inputRange();
+}
+
+void loop(){
+  myInput1.send();
+
+
+// This prevents crashes that happen when incoming usbMIDI is ignored.
+  while(usbMIDI.read()){}
+
+// Also uncomment this if compiling for standard MIDI
+//  while(MIDI.read()){}
+}
