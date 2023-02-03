@@ -5,8 +5,8 @@
 
 byte MIDIChannel = 5;
 
-const int button_1 = 29;
-const int button_2 = 30;
+const byte button_1 = 29;
+const byte button_2 = 30;
 
 // Sets button 1 and 2 to control MIDI CC 1 and 2
 MIDIswitch myInput1(button_1, 1, MOMENTARY);
