@@ -8,23 +8,23 @@
 
 byte touchPin = 15; // CHOOSE A TOUCH PIN
 byte LED = 13;
-TouchVelocity myInput1(touchPin);
+TouchVelocity mInput1(touchPin);
  
 void setup() {
   pinMode(LED, OUTPUT);
   
   // WARNING! setThreshold() uses a call to touchRead()
   // so DON'T touch the input during setup()
-  myInput1.setThreshold();
+  mInput1.setThreshold();
   digitalWrite(LED, HIGH); 
 }
 
 void loop(){
-  int velocity = myInput1.read();
-  if (myInput1.fell()){
+  int velocity = mInput1.read();
+  if (mInput1.fell()){
     digitalWrite(LED, HIGH);
   }
-  if (myInput1.rose()){
+  if (mInput1.rose()){
     digitalWrite(LED, LOW);
   }
   if (velocity >= 1){

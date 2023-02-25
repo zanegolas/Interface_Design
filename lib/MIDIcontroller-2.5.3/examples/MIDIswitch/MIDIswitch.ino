@@ -7,15 +7,15 @@ const int ledPin = 13;   //Set an LED to show the state of a latch button.
 // MOMENTARY: Sends ON message when connection is made, OFF when connection is broken.
 // LATCH: Sends alternating ON OFF messages each time a connection is made.
 // TRIGGER: Sends an ON *and* OFF message each time a connection is made.
-MIDIswitch myInput1(latchPin, 21, LATCH); // Control Change #21
+MIDIswitch mInput1(latchPin, 21, LATCH); // Control Change #21
 
 void setup(){
   pinMode(ledPin, OUTPUT);
 }
 
 void loop(){
-  myInput1.send();
-  digitalWrite(ledPin, myInput1.state);
+  mInput1.send();
+  digitalWrite(ledPin, mInput1.state);
 
 
 // This prevents crashes that happen when incoming usbMIDI is ignored.

@@ -5,48 +5,52 @@
 
 byte MIDIChannel = 5;
 
-const byte button_1 = 29;
-const byte button_2 = 30;
-const byte green_led = 33;
-const byte red_led = 34;
-const byte blue_led = 35;
+// Macros
+const byte BUTTON_1 = 29;
+const byte BUTTON_2 = 30;
+const byte LED_GREEN = 33;
+const byte LED_RED = 34;
+const byte LED_BLUE = 35;
 
 // Sets button 1 and 2 to control MIDI CC 1 and 2
-MIDIswitch myInput1(button_1, 1, MOMENTARY);
-MIDIswitch myInput2(button_2, 2, MOMENTARY);
+MIDIswitch mInput1(BUTTON_1, 1, MOMENTARY);
+MIDIswitch mInput2(BUTTON_2, 2, MOMENTARY);
 
 // Global led variables
-elapsedMillis sinceChange = 0;
-int blueVal = 0;
-int increment = 1;
+elapsedMillis mElapsedMS = 0;
+int mBlueValue = 0;
+int mIncrement = 1;
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
-    pinMode(green_led,OUTPUT);
-    pinMode(red_led, OUTPUT);
-    pinMode(blue_led, OUTPUT);
-    pinMode(button_1, INPUT_PULLUP);
-    pinMode(button_2, INPUT_PULLUP);
+    pinMode(LED_GREEN, OUTPUT);
+    pinMode(LED_RED, OUTPUT);
+    pinMode(LED_BLUE, OUTPUT);
+    pinMode(BUTTON_1, INPUT_PULLUP);
+    pinMode(BUTTON_2, INPUT_PULLUP);
     digitalWrite(LED_BUILTIN, HIGH);
 }
 
 void loop() {
-    myInput1.send();
-    myInput2.send();
+    mInput1.send();
+    mInput2.send();
 
-    //Green LED for device standby and red led for signal
-    digitalWrite(green_led, myInput1.state);
-    digitalWrite(red_led, myInput2.state);
+    //Green LED for input 1, Red LED for input 2, Pulsing Blue LED for standby
+    digitalWrite(LED_GREEN, mInput1.state);
+    digitalWrite(LED_RED, mInput2.state);
 
-
-    if (sinceChange > 3){
-        sinceChange = 0;
-        blueVal += increment;
-        if (blueVal >= 255 || blueVal <= 0){
-            increment *= -1;
+    auto is_writing = (mInput1.state || mInput2.state);
+    if (mElapsedMS > 3 && !is_writing){
+        mElapsedMS = 0;
+        if (mBlueValue >= 255 || mBlueValue <= 0){
+            mIncrement *= -1;
         }
-        analogWrite(blue_led, blueVal);
+        mBlueValue += mIncrement;
+    } else {
+        mBlueValue = 0;
     }
+
+    analogWrite(LED_BLUE, mBlueValue);
 
     // This prevents crashes that happen when incoming usbMIDI is ignored.
     while(usbMIDI.read()){}

@@ -8,17 +8,17 @@ const int touchPin = 1; // Change this to the correct TOUCH pin
 
 // 38 is the note number (See GM DRUM SOUNDS below)
 // TOUCH indicated that you're using a capacitive touch input.
-MIDIdrum myInput1(touchPin, 38, TOUCH);
+MIDIdrum mInput1(touchPin, 38, TOUCH);
 
 void setup(){
   // WARNING! For TOUCH, call setThreshold() with no argument.
   // The threshold is calculated based on a call to
   // touchRead() so DON'T touch the input during setup()
-  myInput1.setThreshold();
+  mInput1.setThreshold();
 }
 
 void loop(){
-  myInput1.send();
+  mInput1.send();
 
 
 // This prevents crashes that happen when incoming usbMIDI is ignored.
