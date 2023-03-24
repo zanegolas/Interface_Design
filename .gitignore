@@ -1,5 +1,6 @@
 .pio
 CMakeListsPrivate.txt
 cmake-build-*/
+build/
 .DS_Store
 .idea
