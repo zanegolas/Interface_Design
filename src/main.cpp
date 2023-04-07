@@ -7,6 +7,9 @@ const byte LIDAR_MOTOR_PIN = 2;
 
 // Global Objects
 RPLidar mLidar;
+elapsedMillis mLatency = 0;
+int mSampleCount = 0;
+int mQualitySamples = 0;
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
@@ -26,6 +29,12 @@ void loop() {
         bool  startBit = mLidar.getCurrentPoint().startBit; //whether this point is belong to a new scan
         byte  quality  = mLidar.getCurrentPoint().quality; //quality of the current measurement
 
+        mSampleCount++;
+
+        if (quality != 0) {
+            mQualitySamples++;
+        }
+        /* Diagnostic Prints
         Serial.print("Distance: ");
         Serial.println(distance);
         Serial.print("Angle: ");
@@ -33,7 +42,25 @@ void loop() {
         Serial.print("Start Bit: ");
         Serial.println(startBit);
         Serial.print("Quality: ");
-        Serial.println(quality);
+        Serial.println(quality); */
+
+        if (startBit) {
+            Serial.print("Start Bit Received After: ");
+            Serial.print(mLatency);
+            Serial.println("ms");
+            Serial.print("Number Of Samples: ");
+            Serial.println(mSampleCount);
+            Serial.print("Quality Samples: ");
+            Serial.println(mQualitySamples);
+            auto samples_per_second = mSampleCount * (1000 / mLatency);
+            Serial.print("Samples Per Second: ");
+            Serial.println(samples_per_second);
+
+            mSampleCount = 0;
+            mQualitySamples = 0;
+            mLatency = 0;
+
+        }
 
         digitalWrite(LED_BUILTIN, HIGH);
 

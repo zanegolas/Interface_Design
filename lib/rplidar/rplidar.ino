@@ -1,6 +1,6 @@
 #include "rplidar_driver_impl.h"
 
-const int lidarMotorPin = 35;
+const int lidarMotorPin = 2;
 char report[80];
 RPLidar rplidar;
 
