@@ -14,14 +14,26 @@ void setup() {
 
     pinMode(LIDAR_MOTOR_PIN, OUTPUT);
     mLidar.begin(Serial1);
+
+    Serial.begin(9600);
+    Serial.println("Setup Complete");
 }
 
 void loop() {
     if (IS_OK(mLidar.waitPoint())) {
         float distance = mLidar.getCurrentPoint().distance; //distance value in mm unit
-        float angle    = mLidar.getCurrentPoint().angle; //anglue value in degree
+        float angle    = mLidar.getCurrentPoint().angle; //angle value in degree
         bool  startBit = mLidar.getCurrentPoint().startBit; //whether this point is belong to a new scan
         byte  quality  = mLidar.getCurrentPoint().quality; //quality of the current measurement
+
+        Serial.print("Distance: ");
+        Serial.println(distance);
+        Serial.print("Angle: ");
+        Serial.println(angle);
+        Serial.print("Start Bit: ");
+        Serial.println(startBit);
+        Serial.print("Quality: ");
+        Serial.println(quality);
 
         digitalWrite(LED_BUILTIN, HIGH);
 
