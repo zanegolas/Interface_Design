@@ -1,89 +1,58 @@
 //2 button midi CC control
 
 #include <Arduino.h>
-#include <MIDIcontroller.h>
+#include <rplidar_driver_impl.h>
 
-byte MIDIChannel = 5;
+const byte LIDAR_MOTOR_PIN = 2;
 
-// Macros
-const byte BUTTON_1 = 29;
-const byte BUTTON_2 = 30;
-const byte LED_GREEN = 33;
-const byte LED_RED = 34;
-const byte LED_BLUE = 35;
-const byte JOYSTICK_1_X = 36;
-const byte JOYSTICK_1_Y = 37;
-const byte JOYSTICK_2_X = 38;
-const byte JOYSTICK_2_Y = 39;
-
-// Sets button 1 and 2 to control MIDI CC 1 and 2
-Bounce mButton1(BUTTON_1, 5);
-Bounce mButton2(BUTTON_2, 5);
-
-int mCurrentJoystick1X = 0;
-int mCurrentJoystick2X = 0;
-
-// Global led variables
-elapsedMillis mElapsedMS = 0;
-int mBlueValue = 0;
-int mIncrement = 1;
+// Global Objects
+RPLidar mLidar;
+elapsedMillis mTimer = 0;
+int mSampleCount = 0;
+char report[80];
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
-    pinMode(LED_GREEN, OUTPUT);
-    pinMode(LED_RED, OUTPUT);
-    pinMode(LED_BLUE, OUTPUT);
-    pinMode(BUTTON_1, INPUT_PULLUP);
-    pinMode(BUTTON_2, INPUT_PULLUP);
-    pinMode(JOYSTICK_1_X, INPUT);
-    pinMode(JOYSTICK_1_Y, INPUT);
-    pinMode(JOYSTICK_2_X, INPUT);
-    pinMode(JOYSTICK_2_Y, INPUT);
     digitalWrite(LED_BUILTIN, HIGH);
+
+    pinMode(LIDAR_MOTOR_PIN, OUTPUT);
+    mLidar.begin();
+
+    delay(1000);
+    mLidar.startScanExpress(true, RPLIDAR_CONF_SCAN_COMMAND_EXPRESS);
+    digitalWrite(LIDAR_MOTOR_PIN, HIGH); // turn on the motor
+    delay(10);
+
+    Serial.begin(9600);
+    Serial.println("Setup Complete");
 }
 
 void loop() {
-    mButton1.update();
-    mButton2.update();
 
-    // Note On messages when each button is pressed
-    if (mButton1.fallingEdge()) {
-        usbMIDI.sendNoteOn(60, 99, 2);  // 60 = C4
-        digitalWrite(LED_RED, HIGH);
-    }
-    if (mButton2.fallingEdge()) {
-        usbMIDI.sendNoteOn(67, 99, 3);
-        digitalWrite(LED_GREEN, HIGH);
-    }
-    // Note Off messages when each button is released
-    if (mButton1.risingEdge()) {
-        usbMIDI.sendNoteOff(60, 0, 2);  // 60 = C4
-        digitalWrite(LED_RED, LOW);
-    }
-    if (mButton2.risingEdge()) {
-        usbMIDI.sendNoteOff(67, 0, 3);
-        digitalWrite(LED_GREEN, LOW);
-    }
+    // loop needs to be send called every loop
+    mLidar.loopScanExpressData();
 
-
-    int joystick_1_x = analogRead(JOYSTICK_1_X) - 512; // 0 at mid point
-    if (abs(joystick_1_x - mCurrentJoystick1X) > 1)  { // have we moved enough to avoid analog jitter?
-        if (abs(joystick_1_x) > 4) { // are we out of the central dead zone?
-            usbMIDI.sendPitchBend(8 * joystick_1_x, 2); // or -8 depending which way you want to go up and down
-            mCurrentJoystick1X = joystick_1_x;
+    // create object to hold received data for processing
+    rplidar_response_measurement_node_hq_t nodes[512];
+    size_t nodeCount = 512; // variable will be set to number of received measurement by reference
+    u_result ans = mLidar.grabScanExpressData(nodes, nodeCount);
+    if (IS_OK(ans)){
+        for (size_t i = 0; i < nodeCount; ++i){
+            // convert to standard units
+            float angle_in_degrees = nodes[i].angle_z_q14 * 90.f / (1<<14);
+            float distance_in_meters = nodes[i].dist_mm_q2 / 1000.f / (1<<2);
+            //Flag Value 1;
+            snprintf(report, sizeof(report), "Degrees: %.2f Distance: %.2f Quality: %d Flag: %d", angle_in_degrees, distance_in_meters, nodes[i].quality, nodes[i].flag);
+            Serial.println(report);
+//            mSampleCount++;
         }
     }
 
-    int joystick_2_x = analogRead(JOYSTICK_2_X) - 512; // 0 at mid point
-    if (abs(joystick_2_x - mCurrentJoystick2X) > 1)  { // have we moved enough to avoid analog jitter?
-        if (abs(joystick_2_x) > 4) { // are we out of the central dead zone?
-            usbMIDI.sendPitchBend(8 * joystick_2_x, 3); // or -8 depending which way you want to go up and down
-            mCurrentJoystick1X = joystick_2_x;
-        }
-    }
-
-
-    // This prevents crashes that happen when incoming usbMIDI is ignored.
-    while(usbMIDI.read()){}
-
+//    if (mTimer >= 1000) {
+//        Serial.print("Samples Per Second: ");
+//        Serial.println(mSampleCount);
+//
+//        mSampleCount = 0;
+//        mTimer = 0;
+//    }
 }
