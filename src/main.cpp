@@ -7,8 +7,7 @@ const byte LIDAR_MOTOR_PIN = 2;
 
 // Global Objects
 RPLidar mLidar;
-elapsedMillis mLatency = 0;
-bool mRotated = false;
+elapsedMillis mTimer = 0;
 int mSampleCount = 0;
 char report[80];
 
@@ -45,15 +44,15 @@ void loop() {
             //Flag Value 1;
             snprintf(report, sizeof(report), "Degrees: %.2f Distance: %.2f Quality: %d Flag: %d", angle_in_degrees, distance_in_meters, nodes[i].quality, nodes[i].flag);
             Serial.println(report);
-            mSampleCount++;
+//            mSampleCount++;
         }
     }
 
-//    if (mLatency >= 1000) {
+//    if (mTimer >= 1000) {
 //        Serial.print("Samples Per Second: ");
 //        Serial.println(mSampleCount);
 //
 //        mSampleCount = 0;
-//        mLatency = 0;
+//        mTimer = 0;
 //    }
 }
