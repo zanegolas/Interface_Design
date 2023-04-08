@@ -1,20 +1,22 @@
-//2 button midi CC control
+
 
 #include <Arduino.h>
 #include <rplidar_driver_impl.h>
 #include "ZGObjectTracker.h"
+#include <vector>
 
 const byte LIDAR_MOTOR_PIN = 2;
 
 // Global Objects
 RPLidar mLidar;
 elapsedMillis mTimer = 0;
+elapsedMillis mProcessWait = 0;
+elapsedMillis mLatency = 0;
 int mSampleCount = 0;
 char report[80];
 bool mReadyToProcess = false;
 ZGObjectTracker mObjectTracker;
-ZGPointData mPointBuffer[1024];
-int mBufferSize = 0;
+std::vector<ZGPolarData> mPointBuffer;
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
@@ -43,29 +45,15 @@ void loop() {
     u_result ans = mLidar.grabScanExpressData(nodes, nodeCount);
     if (IS_OK(ans)){
         for (size_t i = 0; i < nodeCount; ++i){
-            float distance_in_meters = nodes[i].dist_mm_q2 / 1000.f / (1<<2);
-            if (nodes[i].quality == 0 || distance_in_meters == 0.f) {
+
+            if (nodes[i].quality == 0) {
                 continue;
             } else {
-                mPointBuffer[i].angle = nodes[i].angle_z_q14 * 90.f / (1<<14);
-                if (distance_in_meters >= 1.5f) {
-                    distance_in_meters = 0.f;
-                }
-                mPointBuffer[i].distance = distance_in_meters;
-                mBufferSize++;
+                ZGPolarData p;
+                p.distance = nodes[i].dist_mm_q2 / 1000.f / (1<<2);
+                p.angle = nodes[i].angle_z_q14 * 90.f / (1<<14);
+                mPointBuffer.push_back(p);
                 mSampleCount++;
-            }
-
-            if (nodes[i].flag == 1)
-            {
-                mReadyToProcess = true;
-                snprintf(report, sizeof(report), "Ready to process with: %d samples", mBufferSize);
-                Serial.println(report);
-            }
-
-            if (mBufferSize >= 1024) {
-                Serial.println("ERROR: BUFFER OVERFLOW");
-                mBufferSize = 0;
             }
 //            snprintf(report, sizeof(report), "Degrees: %.2f Distance: %.2f Quality: %d Flag: %d", angle_in_degrees, distance_in_meters, nodes[i].quality, nodes[i].flag);
 //            Serial.println(report);
@@ -73,10 +61,16 @@ void loop() {
         }
     }
 
-    if (mReadyToProcess) {
-        mObjectTracker.processBuffer(mPointBuffer, mBufferSize);
-        mReadyToProcess = false;
+    if (mPointBuffer.size() >= 512) {
+        mProcessWait = 0;
+        snprintf(report, sizeof(report), "Processing buffer of %d samples", mPointBuffer.size());
+        Serial.println(report);
+        mObjectTracker.processBuffer(mPointBuffer);
+        snprintf(report, sizeof(report), "Processing took %d ms with total latency of %d ms", static_cast<int>(mProcessWait), static_cast<int>(mLatency));
+        Serial.println(report);
+        mLatency = 0;
     }
+
     if (mTimer >= 1000) {
         snprintf(report, sizeof(report), "Processed %d samples in %d ms", mSampleCount, static_cast<int>(mTimer));
         Serial.println(report);
