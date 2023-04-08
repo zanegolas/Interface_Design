@@ -6,10 +6,17 @@
 //
 #include <Arduino.h>
 #include <rplidar_driver_impl.h>
+#include <vector>
+#include <cmath>
 
 #pragma once
 
-struct ZGPointData {
+struct Point {
+    double x;
+    double y;
+};
+
+struct ZGPolarData {
     float angle = 0;
     float distance = 0;
 };
@@ -34,12 +41,24 @@ public:
     ~ZGObjectTracker();
 
     /* */
-    void processBuffer(ZGPointData (&inResponseBuffer)[1024], int &inBufferSize);
+    void processBuffer(std::vector<ZGPolarData>& inBuffer);
 
 private:
     int mTrackingCount = 0;
     ZGObject mTrackedObjects[8];
 
-    static void _processAverages(ZGObject (&inObjectArray)[8], int inSize);
+    Point polarToCartesian(double angle, double distance) {
+        Point p;
+        p.x = distance * std::cos(angle);
+        p.y = distance * std::sin(angle);
+        return p;
+    }
+
+    void segmentPointCloud(std::vector<ZGPolarData>& inBuffer, std::vector<std::vector<Point>>& clusters);
+
+    double maxDistance = 30.0;
+    int minPointsPerCluster = 2;
+
+    std::vector<std::vector<Point>> mClusters;
 
 };
