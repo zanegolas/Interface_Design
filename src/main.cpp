@@ -50,10 +50,14 @@ void loop() {
                 continue;
             } else {
                 ZGPolarData p;
-                p.distance = nodes[i].dist_mm_q2 / 1000.f / (1<<2);
-                p.angle = nodes[i].angle_z_q14 * 90.f / (1<<14);
+                p.distance = nodes[i].dist_mm_q2 / 10.f / (1<<2); //cm
+                p.angle = nodes[i].angle_z_q14 * 90.f / (1<<14); //degrees
                 mPointBuffer.push_back(p);
                 mSampleCount++;
+            }
+
+            if (nodes[i].flag == 1) {
+                mReadyToProcess = true;
             }
 //            snprintf(report, sizeof(report), "Degrees: %.2f Distance: %.2f Quality: %d Flag: %d", angle_in_degrees, distance_in_meters, nodes[i].quality, nodes[i].flag);
 //            Serial.println(report);
@@ -61,7 +65,7 @@ void loop() {
         }
     }
 
-    if (mPointBuffer.size() >= 512) {
+    if (mReadyToProcess) {
         mProcessWait = 0;
         snprintf(report, sizeof(report), "Processing buffer of %d samples", mPointBuffer.size());
         Serial.println(report);
@@ -69,11 +73,14 @@ void loop() {
         snprintf(report, sizeof(report), "Processing took %d ms with total latency of %d ms", static_cast<int>(mProcessWait), static_cast<int>(mLatency));
         Serial.println(report);
         mLatency = 0;
+        mReadyToProcess = false;
     }
 
     if (mTimer >= 1000) {
         snprintf(report, sizeof(report), "Processed %d samples in %d ms", mSampleCount, static_cast<int>(mTimer));
+        Serial.println(" ");
         Serial.println(report);
+        Serial.println(" ");
 
         mSampleCount = 0;
         mTimer = 0;

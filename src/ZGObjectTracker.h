@@ -45,9 +45,10 @@ public:
 
 private:
     static Point polarToCartesian(float angle, float distance) {
+        float angle_radians = std::fmod(angle, 360.0f) * (M_PI / 180.0f);
         Point p {};
-        p.x = distance * std::cos(angle);
-        p.y = distance * std::sin(angle);
+        p.x = distance * std::cos(angle_radians);
+        p.y = distance * std::sin(angle_radians);
         return p;
     }
 
@@ -57,7 +58,8 @@ private:
 
     void printClusterInfo();
 
-    float maxDistance = 2.0;
+    float maxDistance = 200.f; //in cm
+    float maxClusterDistance = 50.f;
     int minPointsPerCluster = 2;
 
     std::vector<std::vector<Point>> mClusters;

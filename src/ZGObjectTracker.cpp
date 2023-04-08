@@ -49,7 +49,7 @@ void ZGObjectTracker::segmentPointCloud(std::vector<ZGPolarData>& inBuffer, std:
                 continue;
             }
             auto distance = std::hypot(points[j].x - points[i].x, points[j].y - points[i].y);
-            if (distance <= maxDistance) {
+            if (distance <= maxClusterDistance) {
                 cluster.push_back(points[j]);
                 visited[j] = true;
             }
