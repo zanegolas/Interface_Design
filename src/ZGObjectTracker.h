@@ -12,8 +12,8 @@
 #pragma once
 
 struct Point {
-    double x;
-    double y;
+    float x;
+    float y;
 };
 
 struct ZGPolarData {
@@ -44,11 +44,8 @@ public:
     void processBuffer(std::vector<ZGPolarData>& inBuffer);
 
 private:
-    int mTrackingCount = 0;
-    ZGObject mTrackedObjects[8];
-
-    Point polarToCartesian(double angle, double distance) {
-        Point p;
+    static Point polarToCartesian(float angle, float distance) {
+        Point p {};
         p.x = distance * std::cos(angle);
         p.y = distance * std::sin(angle);
         return p;
@@ -56,9 +53,11 @@ private:
 
     void segmentPointCloud(std::vector<ZGPolarData>& inBuffer, std::vector<std::vector<Point>>& clusters);
 
+    static Point findClusterAverage(const std::vector<Point>& inCluster);
+
     void printClusterInfo();
 
-    double maxDistance = 2.0;
+    float maxDistance = 2.0;
     int minPointsPerCluster = 2;
 
     std::vector<std::vector<Point>> mClusters;
