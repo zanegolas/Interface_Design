@@ -22,10 +22,7 @@ void ZGObjectTracker::processBuffer(std::vector<ZGPolarData>& inBuffer)
     mClusters.clear();
     segmentPointCloud(inBuffer, mClusters);
     inBuffer.clear();
-    char report[80];
-    snprintf(report, sizeof(report), "Found %d clusters in specified range", mClusters.size());
-    Serial.println(report);
-
+    printClusterInfo();
 }
 
 void ZGObjectTracker::segmentPointCloud(std::vector<ZGPolarData>& inBuffer, std::vector<std::vector<Point>>& clusters) {
@@ -60,5 +57,15 @@ void ZGObjectTracker::segmentPointCloud(std::vector<ZGPolarData>& inBuffer, std:
         if (cluster.size() >= minPointsPerCluster) {
             clusters.push_back(cluster);
         }
+    }
+}
+
+void ZGObjectTracker::printClusterInfo() {
+    char report[80];
+    snprintf(report, sizeof(report), "Found %d clusters in specified range", mClusters.size());
+    Serial.println(report);
+    for(const auto& cluster : mClusters) {
+        snprintf(report, sizeof(report), "Cluster Contains %d Points", cluster.size());
+        Serial.println(report);
     }
 }

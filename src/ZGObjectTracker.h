@@ -56,7 +56,9 @@ private:
 
     void segmentPointCloud(std::vector<ZGPolarData>& inBuffer, std::vector<std::vector<Point>>& clusters);
 
-    double maxDistance = 30.0;
+    void printClusterInfo();
+
+    double maxDistance = 2.0;
     int minPointsPerCluster = 2;
 
     std::vector<std::vector<Point>> mClusters;
