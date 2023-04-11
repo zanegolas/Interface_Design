@@ -7,190 +7,47 @@
 //
 
 #include <Arduino.h>
-#include <rplidar_driver_impl.h>
 #include "ZGObjectTracker.h"
-#include <vector>
-#include <TeensyUserInterface.h>
-#include <font_ArialBold.h>
+#include "ZGLidar.h"
+#include "ZGDisplay.h"
+#include <memory>
 
 
 // Pin Definitions
-const int LIDAR_MOTOR_PIN = 3;
 const int LCD_CS_PIN = 10;
 const int LCD_DC_PIN = 9;
 const int TOUCH_CS_PIN = 8;
 
 
 // Global Objects
-RPLidar mLidar;
-TeensyUserInterface ui;
-elapsedMillis mTimer = 0;
-elapsedMillis mProcessWait = 0;
-elapsedMillis mLatency = 0;
-int mSampleCount = 0;
-char reportTotal[80];
-char reportReady[80];
-char reportLatency[80];
-bool mReadyToProcess = false;
-ZGObjectTracker mObjectTracker;
-std::vector<ZGPolarData> mPointBuffer;
-bool shouldUpdateDisplay = false;
-bool showDebugData = false;
+std::unique_ptr<ZGObjectTracker> mObjectTracker;
+std::unique_ptr<ZGLidar> mLidar;
+std::unique_ptr<ZGDisplay> mDisplay;
 
-const uint16_t colorArray [] {
-    LCD_BLUE,
-    LCD_GREEN,
-    LCD_YELLOW,
-    LCD_PURPLE,
-    LCD_CYAN,
-    LCD_ORANGE
-};
+
 
 /**
  * SETUP
  */
 
 void setup() {
-    // LCD
-    ui.begin(LCD_CS_PIN, LCD_DC_PIN, TOUCH_CS_PIN, LCD_ORIENTATION_LANDSCAPE_4PIN_RIGHT, Arial_9_Bold);
+    mObjectTracker = std::make_unique<ZGObjectTracker>();
+    mLidar = std::make_unique<ZGLidar>(mObjectTracker.get());
+    mDisplay = std::make_unique<ZGDisplay>(mObjectTracker.get(), mLidar.get());
 
-    // LiDAR
-    pinMode(LIDAR_MOTOR_PIN, OUTPUT);
-    mLidar.begin();
-    delay(1000);
-    mLidar.startScanExpress(true, RPLIDAR_CONF_SCAN_COMMAND_EXPRESS);
-    digitalWrite(LIDAR_MOTOR_PIN, HIGH); // turn on the motor
-    delay(10);
-
-    // Midi
+    mLidar->initialize();
+    mDisplay->initialize();
     usbMIDI.begin();
-
-    ui.lcdPrint("Setup Complete");
 }
-
-
-// Forward Declaration
-void printDebugData();
-void plotObjects();
-
 
 /**
  * MAIN PROGRAM
  */
 
 void loop() {
-
-    // Call every loop to receive data from the lidar hardware
-    mLidar.loopScanExpressData();
-
-    // Create object to hold received data for processing
-    rplidar_response_measurement_node_hq_t nodes[512];
-    size_t nodeCount = 512; // variable will be set to number of received measurement by reference
-    u_result ans = mLidar.grabScanExpressData(nodes, nodeCount);
-    if (IS_OK(ans)){
-        // If the data is valid, write all samples with a quality greater than 0 to processing buffer
-        for (size_t i = 0; i < nodeCount; ++i){
-            if (nodes[i].quality == 0) {
-                continue;
-            } else {
-                ZGPolarData p;
-                p.distance = nodes[i].dist_mm_q2 / 10.f / (1<<2); //cm
-                p.angle = nodes[i].angle_z_q14 * 90.f / (1<<14); //degrees
-                mPointBuffer.push_back(p);
-                mSampleCount++;
-            }
-            // Trigger processing when new scan flag is received
-            if (nodes[i].flag == 1) {
-                mReadyToProcess = true;
-            }
-        }
-    }
-
-    // Process sample buffer when a single scan is complete and generate latency report strings
-    if (mReadyToProcess) {
-        mProcessWait = 0;
-        snprintf(reportReady, sizeof(reportReady), "Processing buffer of %d samples", mPointBuffer.size());
-        mObjectTracker.processBuffer(mPointBuffer);
-        snprintf(reportLatency, sizeof(reportLatency), "Processing took %d ms with total latency of %d ms", static_cast<int>(mProcessWait), static_cast<int>(mLatency));
-        mLatency = 0;
-        mReadyToProcess = false;
-    }
-
-    // Measure total samples processed every second and generate report string
-    if (mTimer >= 1000) {
-        snprintf(reportTotal, sizeof(reportTotal), "Processed %d samples in %d ms", mSampleCount, static_cast<int>(mTimer));
-        shouldUpdateDisplay = true;
-        mSampleCount = 0;
-        mTimer = 0;
-    }
-
-    // Updated LCD Info
-    if (shouldUpdateDisplay) {
-        if (showDebugData) {
-            printDebugData();
-        } else {
-            plotObjects();
-        }
-        shouldUpdateDisplay = false;
-    }
+   mLidar->run();
+   mDisplay->refresh();
 
     // Prevent errors when incoming usb midi buffer is ignored
     while(usbMIDI.read()){}
-}
-
-
-/**
- * LCD FUNCTIONS
- */
-
-void printDebugData(){
-    ui.lcdClearScreen(LCD_BLACK);
-    ui.lcdSetCursorXY(0, 0);
-    ui.lcdPrint(reportTotal);
-    ui.lcdSetCursorXY(0, 12);
-    ui.lcdPrint(reportReady);
-    ui.lcdSetCursorXY(0, 24);
-    ui.lcdPrint(reportLatency);
-    auto clusters = mObjectTracker.getClusters();
-    char report[80];
-    snprintf(report, sizeof(report), "Found %d clusters in specified range", clusters.size());
-    ui.lcdSetCursorXY(0, 36);
-    ui.lcdPrint(report);
-    snprintf(report, sizeof(report), "Tracking %d Objects", mObjectTracker.getObjects().size());
-    ui.lcdSetCursorXY(0, 48);
-    ui.lcdPrint(report);
-    int index = 1;
-    for(const auto& cluster : clusters) {
-        snprintf(report, sizeof(report), "Cluster %d Contains %d Points ", index, cluster.size());
-        ui.lcdSetCursorXY(0, 48 + 12 * index);
-        ui.lcdPrint(report);
-        index++;
-    }
-    shouldUpdateDisplay = false;
-}
-
-void plotObjects(){
-    auto width = 320;
-    auto height = 240;
-    auto center_x = width / 2;
-    auto center_y = height / 2;
-    ui.lcdClearScreen(LCD_BLACK);
-    ui.lcdDrawFilledCircle(center_x, center_y, 2, LCD_RED);
-    auto clusters = mObjectTracker.getClusters();
-    auto index = 0;
-    for (const auto& cluster : clusters) {
-        auto object_color = colorArray[index];
-        for (auto point : cluster) {
-            ui.lcdDrawFilledCircle(center_x + static_cast<int>(point.x), center_y + static_cast<int>(point.y), 1, object_color);
-        }
-        index++;
-        if (index > 5) {
-            index = 0;
-        }
-    }
-    auto objects = mObjectTracker.getObjects();
-    for (auto object :objects){
-        ui.lcdDrawFilledCircle(center_x + static_cast<int>(object.x), center_y + static_cast<int>(object.y), 4, LCD_RED);
-    }
-    shouldUpdateDisplay = false;
 }
