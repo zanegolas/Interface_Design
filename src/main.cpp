@@ -27,6 +27,7 @@ bool mReadyToProcess = false;
 ZGObjectTracker mObjectTracker;
 std::vector<ZGPolarData> mPointBuffer;
 bool shouldUpdateDisplay = false;
+bool showDebugData = false;
 
 const uint16_t colorArray [] {
     LCD_BLUE,
@@ -77,7 +78,7 @@ void playMidi() {
     }
 }
 
-void updateDisplay(){
+void printDebugData(){
     ui.lcdClearScreen(LCD_BLACK);
     ui.lcdSetCursorXY(0, 0);
     ui.lcdPrint(reportTotal);
@@ -182,8 +183,12 @@ void loop() {
     }
 
     if (shouldUpdateDisplay) {
-//        updateDisplay();
-        plotObjects();
+        if (showDebugData) {
+            printDebugData();
+        } else {
+            plotObjects();
+        }
+        shouldUpdateDisplay = false;
     }
 
     playMidi();
