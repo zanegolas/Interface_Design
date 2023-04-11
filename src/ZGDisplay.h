@@ -43,6 +43,8 @@ private:
     TeensyUserInterface ui;
 
     bool showDebugData = false;
+    bool mRedraw = true;
+    elapsedMillis mRefreshTimer = 0;
 
     const uint16_t colorArray [6] {
             LCD_BLUE,

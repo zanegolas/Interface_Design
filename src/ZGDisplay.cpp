@@ -25,13 +25,19 @@ void ZGDisplay::initialize()
 
 void ZGDisplay::refresh()
 {
-    if (mLidar->getShouldUpdateDisplay()) {
+    ui.getTouchEvents();
+    if (ui.checkForTouchEventInRect(TOUCH_PUSHED_EVENT, 0, 0, ui.displaySpaceWidth, ui.displaySpaceHeight)){
+        showDebugData = !showDebugData;
+        mRedraw = true;
+    }
+    if (mRefreshTimer >= 250) {
         if (showDebugData) {
-            printDebugData();
+            printDebugData(mRedraw);
+            mRedraw = false;
         } else {
             plotObjects();
         }
-        mLidar->setShouldUpdateDisplay(false);
+        mRefreshTimer = 0;
     } else {
         return;
     }
