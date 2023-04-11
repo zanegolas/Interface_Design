@@ -11,6 +11,11 @@
 
 #pragma once
 
+struct ReportLine
+{
+    char data[80];
+};
+
 struct Point {
     float x;
     float y;
@@ -22,14 +27,11 @@ struct ZGPolarData {
 };
 
 struct ZGObject {
-    float startAngle = 0;
-    float startDistance = 0;
-    float endAngle = 0;
-    float endDistance = 0;
+    float x;
+    float y;
     float angle = 0;
     float distance = 0;
-    bool updated = false;
-    int ttl = 0;
+    bool remove = false;
 };
 
 class ZGObjectTracker {
@@ -42,6 +44,9 @@ public:
 
     /* */
     void processBuffer(std::vector<ZGPolarData>& inBuffer);
+
+    const std::vector<std::vector<Point>> &getClusters() const;
+    const std::vector<ZGObject> &getObjects() const;
 
 private:
     static Point polarToCartesian(float angle, float distance) {
@@ -56,12 +61,15 @@ private:
 
     static Point findClusterAverage(const std::vector<Point>& inCluster);
 
+    void updateTrackedObjects();
+
     void printClusterInfo();
 
     float maxDistance = 200.f; //in cm
-    float maxClusterDistance = 50.f;
+    float maxClusterDistance = 70.f;
     int minPointsPerCluster = 2;
 
     std::vector<std::vector<Point>> mClusters;
+    std::vector<ZGObject> mTrackedObjects;
 
 };

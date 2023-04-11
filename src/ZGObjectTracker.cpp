@@ -7,6 +7,7 @@
 //
 
 
+#include <algorithm>
 #include "ZGObjectTracker.h"
 
 ZGObjectTracker::ZGObjectTracker() {
@@ -21,8 +22,9 @@ void ZGObjectTracker::processBuffer(std::vector<ZGPolarData>& inBuffer)
 {
     mClusters.clear();
     segmentPointCloud(inBuffer, mClusters);
+    updateTrackedObjects();
     inBuffer.clear();
-    printClusterInfo();
+//    printClusterInfo();
 }
 
 void ZGObjectTracker::segmentPointCloud(std::vector<ZGPolarData>& inBuffer, std::vector<std::vector<Point>>& clusters) {
@@ -31,7 +33,7 @@ void ZGObjectTracker::segmentPointCloud(std::vector<ZGPolarData>& inBuffer, std:
         auto angle = point.angle;
         auto distance = point.distance;
         if (distance <= maxDistance) {
-            Point p = polarToCartesian(angle * M_PI / 180.0, distance); // Convert polar to Cartesian coordinates
+            Point p = polarToCartesian(angle, distance); // Convert polar to Cartesian coordinates
             points.push_back(p);
         }
     }
@@ -86,4 +88,46 @@ Point ZGObjectTracker::findClusterAverage(const std::vector<Point> &inCluster) {
 
     return  p;
 
+}
+
+const std::vector<std::vector<Point>> &ZGObjectTracker::getClusters() const {
+    return mClusters;
+}
+
+void ZGObjectTracker::updateTrackedObjects() {
+    // Flag existing objects to be removed if they aren't updated
+    for (auto& object : mTrackedObjects) {
+        object.remove = true;
+    }
+
+    // Step through found clusters
+    for(auto cluster : mClusters) {
+        auto center = findClusterAverage(cluster);
+        auto found_match = false;
+        // Try to match to an existing object;
+        for (auto& object : mTrackedObjects) {
+            auto distance = std::hypot(center.x - object.x, center.y - object.y);
+            if (distance <= maxClusterDistance) {
+                object.x = center.x;
+                object.y = center.y;
+                object.remove = false;
+                found_match = true;
+                break;
+            }
+        }
+        // If we don't find a match we add a new tracked object;
+        if (!found_match) {
+            ZGObject new_object {center.x, center.y};
+            mTrackedObjects.push_back(new_object);
+        }
+    }
+
+    // Remove objects that didn't find a match by flag
+    mTrackedObjects.erase(std::remove_if(mTrackedObjects.begin(), mTrackedObjects.end(), [](ZGObject const& e){ return e.remove; }),
+              mTrackedObjects.end());
+
+}
+
+const std::vector<ZGObject> &ZGObjectTracker::getObjects() const {
+    return mTrackedObjects;
 }
