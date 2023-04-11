@@ -59,9 +59,22 @@ void setup() {
     digitalWrite(LIDAR_MOTOR_PIN, HIGH); // turn on the motor
     delay(10);
 
+    usbMIDI.begin();
+
 //    Serial.begin(9600);
 //    Serial.println("Setup Complete");
     ui.lcdPrint("Setup Complete");
+}
+
+void playMidi() {
+    for (auto& object : mObjectTracker.getObjects()) {
+        if (object.newMidiNote != object.currentMidiNote) {
+            usbMIDI.sendNoteOff(object.currentMidiNote, 127, object.midiChannel);
+            object.currentMidiNote = object.newMidiNote;
+            usbMIDI.sendNoteOn(object.currentMidiNote, 127, object.midiChannel);
+        }
+        usbMIDI.sendControlChange(1, object.modValue, object.midiChannel);
+    }
 }
 
 void updateDisplay(){
@@ -172,4 +185,8 @@ void loop() {
 //        updateDisplay();
         plotObjects();
     }
+
+    playMidi();
+
+    while(usbMIDI.read()){}
 }

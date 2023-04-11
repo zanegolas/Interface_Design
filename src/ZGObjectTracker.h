@@ -32,6 +32,20 @@ struct ZGObject {
     float angle = 0;
     float distance = 0;
     bool remove = false;
+
+    static constexpr double midi_factor = 12. / 360.;
+    static constexpr float mod_factor = 127.f / 150.f;
+
+    //MIDI
+    int currentMidiNote = 0;
+    int newMidiNote = 0;
+    int midiChannel = 1;
+    int modValue = 0;
+
+    void calculateMidi(){
+        newMidiNote = static_cast<int>(angle * midi_factor) + 50;
+        modValue = 127 - (distance * mod_factor);
+    }
 };
 
 class ZGObjectTracker {
@@ -46,7 +60,7 @@ public:
     void processBuffer(std::vector<ZGPolarData>& inBuffer);
 
     const std::vector<std::vector<Point>> &getClusters() const;
-    const std::vector<ZGObject> &getObjects() const;
+    std::vector<ZGObject> &getObjects();
 
 private:
     static Point polarToCartesian(float angle, float distance) {
@@ -57,6 +71,18 @@ private:
         return p;
     }
 
+    static ZGPolarData cartesianToPolar(Point inPointXY) {
+        float distance = std::hypot(inPointXY.x, inPointXY.y);
+        float angle_radians = std::atan2(inPointXY.y, inPointXY.x);
+        float angle_degrees = angle_radians * (180.0f / M_PI);
+        if (angle_degrees < 0.0f) {
+            angle_degrees += 360.0f;
+        }
+
+        return ZGPolarData{angle_degrees, distance};
+    }
+
+
     void segmentPointCloud(std::vector<ZGPolarData>& inBuffer, std::vector<std::vector<Point>>& clusters);
 
     static Point findClusterAverage(const std::vector<Point>& inCluster);
@@ -65,7 +91,7 @@ private:
 
     void printClusterInfo();
 
-    float maxDistance = 200.f; //in cm
+    float maxDistance = 150.f; //in cm
     float maxClusterDistance = 70.f;
     int minPointsPerCluster = 2;
 

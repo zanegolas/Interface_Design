@@ -122,12 +122,27 @@ void ZGObjectTracker::updateTrackedObjects() {
         }
     }
 
+    // Send note off before removal
+    for (auto object : mTrackedObjects) {
+        if (object.remove){
+            usbMIDI.sendNoteOff(object.currentMidiNote, 120, object.midiChannel);
+        }
+    }
+
     // Remove objects that didn't find a match by flag
     mTrackedObjects.erase(std::remove_if(mTrackedObjects.begin(), mTrackedObjects.end(), [](ZGObject const& e){ return e.remove; }),
               mTrackedObjects.end());
 
+    // Update polar info
+    for (auto& object : mTrackedObjects) {
+        auto polar = cartesianToPolar(Point{object.x, object.y});
+        object.angle = polar.angle;
+        object.distance = polar.distance;
+        object.calculateMidi();
+    }
+
 }
 
-const std::vector<ZGObject> &ZGObjectTracker::getObjects() const {
+std::vector<ZGObject> &ZGObjectTracker::getObjects() {
     return mTrackedObjects;
 }
