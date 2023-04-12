@@ -112,6 +112,7 @@ void ZGObjectTracker::updateTrackedObjects() {
         // If we don't find a match we add a new tracked object;
         if (!found_match) {
             ZGObject new_object {center.x, center.y};
+            new_object.midiChannel = _assignMidiChannel();
             mTrackedObjects.push_back(new_object);
         }
     }
@@ -154,4 +155,12 @@ ZGPolarData ZGObjectTracker::cartesianToPolar(ZGPoint inPointXY) {
     }
 
     return ZGPolarData{angle_degrees, distance};
+}
+
+int ZGObjectTracker::_assignMidiChannel() {
+    mMidiIndex += 1;
+    if (mMidiIndex > 16) {
+        mMidiIndex = 1;
+    }
+    return mMidiIndex;
 }

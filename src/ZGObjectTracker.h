@@ -142,9 +142,14 @@ private:
      */
     __attribute__((unused)) void printClusterInfo();
 
+
+    int _assignMidiChannel();
+
     const float mMaxDistance = 150.f; //in cm
     const float mMaxClusterDistance = 70.f;
     const int mMinPointsPerCluster = 2;
+
+    int mMidiIndex = 0;
 
     std::vector<std::vector<ZGPoint>> mClusters;
     std::vector<ZGObject> mTrackedObjects;
