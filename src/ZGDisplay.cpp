@@ -20,7 +20,6 @@ ZGDisplay::~ZGDisplay() = default;
 void ZGDisplay::initialize()
 {
     ui.begin(LCD_CS_PIN, LCD_DC_PIN, TOUCH_CS_PIN, LCD_ORIENTATION_LANDSCAPE_4PIN_RIGHT, Arial_9_Bold);
-    printDebugData(true);
 }
 
 void ZGDisplay::refresh()
@@ -30,13 +29,13 @@ void ZGDisplay::refresh()
         showDebugData = !showDebugData;
         mRedraw = true;
     }
-    if (mRefreshTimer >= 250) {
+    if (mRefreshTimer >= 100) {
         if (showDebugData) {
             printDebugData(mRedraw);
-            mRedraw = false;
         } else {
-            plotObjects();
+            plotObjects(mRedraw);
         }
+        mRedraw = false;
         mRefreshTimer = 0;
     } else {
         return;
@@ -76,14 +75,35 @@ void ZGDisplay::printDebugValue(int inValue, int inLine)
     ui.lcdPrint(print_val);
 }
 
-void ZGDisplay::plotObjects()
+void ZGDisplay::plotObjects(bool inRedrawAll)
 {
     auto width = 320;
     auto height = 240;
     auto center_x = width / 2;
     auto center_y = height / 2;
-    ui.lcdClearScreen(LCD_BLACK);
+
+    if (inRedrawAll) {
+        ui.lcdClearScreen(LCD_BLACK);
+
+    } else { // Erase previous data
+        auto clusters = mDisplayedClusters;
+        for (const auto &cluster: clusters) {
+            auto object_color = LCD_BLACK;
+            for (auto point: cluster) {
+                ui.lcdDrawFilledCircle(center_x + static_cast<int>(point.x), center_y + static_cast<int>(point.y), 1,
+                                       object_color);
+            }
+        }
+        auto objects = mDisplayedObjects;
+        for (auto object: objects) {
+            ui.lcdDrawFilledCircle(center_x + static_cast<int>(object.x), center_y + static_cast<int>(object.y), 4,
+                                   LCD_BLACK);
+        }
+    }
+
     ui.lcdDrawFilledCircle(center_x, center_y, 2, LCD_RED);
+
+    // Paint new data
     auto clusters = mObjectTracker->getClusters();
     auto index = 0;
     for (const auto& cluster : clusters) {
@@ -100,4 +120,8 @@ void ZGDisplay::plotObjects()
     for (auto object :objects){
         ui.lcdDrawFilledCircle(center_x + static_cast<int>(object.x), center_y + static_cast<int>(object.y), 4, LCD_RED);
     }
+
+    // Save for next frame
+    mDisplayedClusters = clusters;
+    mDisplayedObjects = objects;
 }

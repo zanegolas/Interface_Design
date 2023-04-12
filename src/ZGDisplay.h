@@ -32,7 +32,7 @@ public:
 
     void printDebugValue(int inValue, int inLine);
 
-    void plotObjects();
+    void plotObjects(bool inRedrawAll = false);
 
 private:
     // Pin Definitions
@@ -65,5 +65,8 @@ private:
 
     ZGObjectTracker* mObjectTracker;
     ZGLidar* mLidar;
+
+    std::vector<ZGObject> mDisplayedObjects;
+    std::vector<std::vector<ZGPoint>> mDisplayedClusters;
 
 };
