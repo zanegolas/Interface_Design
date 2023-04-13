@@ -1,5 +1,9 @@
 //
+// ZGObject.cpp
+// Teensy 4.1
+//
 // Created by Zane Golas on 4/12/23.
+// Copyright (c) 2023 Zane Golas. All rights reserved.
 //
 
 #include "ZGObject.h"
