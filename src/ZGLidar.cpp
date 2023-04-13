@@ -43,6 +43,11 @@ void ZGLidar::_readLidarBuffer()
     if (IS_OK(ans)){
         // If the data is valid, write all samples with a quality greater than 0 to processing buffer
         for (size_t i = 0; i < nodeCount; ++i){
+            // Trigger processing when new scan flag is received
+            if (nodes[i].flag == 1 || mPointBuffer.size() >= 512) {
+                mReadyToProcess = true;
+            }
+
             if (nodes[i].quality == 0) {
                 continue;
             } else {
@@ -51,10 +56,6 @@ void ZGLidar::_readLidarBuffer()
                 p.angle = nodes[i].angle_z_q14 * 90.f / (1<<14); //degrees
                 mPointBuffer.push_back(p);
                 mSampleCount++;
-            }
-            // Trigger processing when new scan flag is received
-            if (nodes[i].flag == 1) {
-                mReadyToProcess = true;
             }
         }
     }
