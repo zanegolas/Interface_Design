@@ -24,6 +24,8 @@ public:
 
     const float& getY() const;
 
+    ZGPoint getPoint() const;
+
     void flagForRemoval(bool inShouldRemove);
 
     const bool& requestToRemove() const;

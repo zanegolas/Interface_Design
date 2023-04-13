@@ -92,3 +92,7 @@ const float &ZGObject::getX() const {
 const float &ZGObject::getY() const {
     return mY;
 }
+
+ZGPoint ZGObject::getPoint() const {
+    return ZGPoint{mX, mY};
+}

@@ -66,7 +66,7 @@ private:
     ZGObjectTracker* mObjectTracker;
     ZGLidar* mLidar;
 
-    std::vector<ZGObject> mDisplayedObjects;
+    std::vector<ZGPoint> mDisplayedObjects;
     std::vector<std::vector<ZGPoint>> mDisplayedClusters;
 
 };

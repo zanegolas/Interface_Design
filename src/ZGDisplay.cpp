@@ -96,7 +96,7 @@ void ZGDisplay::plotObjects(bool inRedrawAll)
         }
         auto objects = mDisplayedObjects;
         for (const auto& object: objects) {
-            ui.lcdDrawFilledCircle(center_x + static_cast<int>(object.getX()), center_y + static_cast<int>(object.getY()), 4,
+            ui.lcdDrawFilledCircle(center_x + static_cast<int>(object.x), center_y + static_cast<int>(object.y), 4,
                                    LCD_BLACK);
         }
     }
@@ -117,11 +117,12 @@ void ZGDisplay::plotObjects(bool inRedrawAll)
         }
     }
     auto objects = mObjectTracker->getObjects();
+    mDisplayedObjects.clear();
     for (const auto& object :objects){
         ui.lcdDrawFilledCircle(center_x + static_cast<int>(object.getX()), center_y + static_cast<int>(object.getY()), 4, LCD_RED);
+        mDisplayedObjects.push_back(object.getPoint());
     }
 
     // Save for next frame
     mDisplayedClusters = clusters;
-    mDisplayedObjects = objects;
 }
