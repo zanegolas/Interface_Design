@@ -10,7 +10,6 @@
 #include <rplidar_driver_impl.h>
 #include <vector>
 #include <cmath>
-#include "ZGConversionHelpers.h"
 #include "ZGObject.h"
 
 #pragma once

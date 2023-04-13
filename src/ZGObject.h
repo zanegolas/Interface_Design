@@ -22,7 +22,7 @@ public:
 
     void flagForRemoval(bool inShouldRemove);
 
-    const bool& getShouldRemove() const;
+    const bool& requestToRemove() const;
 
 private:
 

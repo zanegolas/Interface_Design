@@ -103,7 +103,7 @@ void ZGObjectTracker::_updateTrackedObjects() {
     }
 
     // Remove objects that didn't find a match by flag
-    mTrackedObjects.erase(std::remove_if(mTrackedObjects.begin(), mTrackedObjects.end(), [](ZGObject e){ return e.getShouldRemove(); }),
+    mTrackedObjects.erase(std::remove_if(mTrackedObjects.begin(), mTrackedObjects.end(), [](const ZGObject& e){ return e.requestToRemove(); }),
               mTrackedObjects.end());
 }
 

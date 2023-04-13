@@ -21,9 +21,7 @@ ZGObject::ZGObject(float inX, float inY) {
     _playMidi();
 }
 
-ZGObject::~ZGObject() {
-    usbMIDI.sendNoteOff(currentMidiNote, 127, mMidiChannel);
-}
+ZGObject::~ZGObject() = default;
 
 void ZGObject::updatePoint(ZGPoint inPoint) {
     auto polar = ZGConversionHelpers::cartesianToPolar(inPoint);
@@ -38,7 +36,7 @@ void ZGObject::updatePoint(ZGPoint inPoint) {
     mRemoveFlag = false;
 
     if (mSpeedTracker != 0) {
-        auto time = static_cast<float>(1000 / mSpeedTracker);
+        auto time = 100.f / static_cast<float>(mSpeedTracker);
         mSpeedTracker = 0;
         mSpeed = time * cart_distance;
         mAngleSpeed = time * angle_distance;
@@ -52,7 +50,10 @@ void ZGObject::flagForRemoval(bool inShouldRemove) {
     mRemoveFlag = inShouldRemove;
 }
 
-const bool & ZGObject::getShouldRemove() const {
+const bool & ZGObject::requestToRemove() const {
+    if (mRemoveFlag) {
+        usbMIDI.sendNoteOff(currentMidiNote, 127, mMidiChannel);
+    }
     return mRemoveFlag;
 }
 

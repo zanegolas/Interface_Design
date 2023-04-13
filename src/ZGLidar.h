@@ -26,10 +26,6 @@ public:
 
     void run();
 
-    bool getShouldUpdateDisplay() const;
-
-    void setShouldUpdateDisplay(bool inShouldUpdateDisplay);
-
     const int& getSamplesPerSecond() const;
 
     const int& getTotalLatency() const;
@@ -59,7 +55,6 @@ private:
     int mTotalLatency = 0;
     int mProcessingLatency = 0;
     bool mReadyToProcess = false;
-    bool mShouldUpdateDisplay = false;
 
     std::vector<ZGPolarData> mPointBuffer;
     ZGObjectTracker* mObjectTracker;
