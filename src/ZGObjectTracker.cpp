@@ -160,7 +160,7 @@ ZGPolarData ZGObjectTracker::cartesianToPolar(ZGPoint inPointXY) {
 int ZGObjectTracker::_assignMidiChannel() {
     mMidiIndex += 1;
     if (mMidiIndex > 16) {
-        mMidiIndex = 1;
+        mMidiIndex = 2;
     }
     return mMidiIndex;
 }

@@ -61,7 +61,7 @@ struct ZGObject {
             currentMidiNote = newMidiNote;
             usbMIDI.sendNoteOn(currentMidiNote, 127, midiChannel);
         }
-        usbMIDI.sendControlChange(1, modValue, midiChannel);
+        usbMIDI.sendControlChange( 1, modValue, midiChannel);
     }
 
 };
@@ -149,7 +149,7 @@ private:
     const float mMaxClusterDistance = 70.f;
     const int mMinPointsPerCluster = 2;
 
-    int mMidiIndex = 0;
+    int mMidiIndex = 1;
 
     std::vector<std::vector<ZGPoint>> mClusters;
     std::vector<ZGObject> mTrackedObjects;
