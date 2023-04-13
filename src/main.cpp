@@ -12,19 +12,10 @@
 #include "ZGDisplay.h"
 #include <memory>
 
-
-// Pin Definitions
-const int LCD_CS_PIN = 10;
-const int LCD_DC_PIN = 9;
-const int TOUCH_CS_PIN = 8;
-
-
 // Global Objects
 std::unique_ptr<ZGObjectTracker> mObjectTracker;
 std::unique_ptr<ZGLidar> mLidar;
 std::unique_ptr<ZGDisplay> mDisplay;
-
-
 
 /**
  * SETUP

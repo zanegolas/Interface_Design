@@ -77,18 +77,9 @@ void ZGLidar::_updateLogs() {
     // Measure total samples processed every second and generate report string
     if (mTimer >= 1000) {
         mSamplesPerSecond = mSampleCount;
-        mShouldUpdateDisplay = true;
         mSampleCount = 0;
         mTimer = 0;
     }
-}
-
-bool ZGLidar::getShouldUpdateDisplay() const {
-    return mShouldUpdateDisplay;
-}
-
-void ZGLidar::setShouldUpdateDisplay(bool inShouldUpdateDisplay) {
-    ZGLidar::mShouldUpdateDisplay = inShouldUpdateDisplay;
 }
 
 const int& ZGLidar::getSamplesPerSecond() const {
