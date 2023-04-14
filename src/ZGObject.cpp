@@ -9,20 +9,37 @@
 #include "ZGObject.h"
 
 namespace {
-    int MIDI_INDEX = 1;
+    bool isChannelAssigned[15] {
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+    };
 }
 
 ZGObject::ZGObject(float inX, float inY) {
     mX = inX;
     mY = inY;
-    mMidiChannel = _assignMidiChannel();
-    auto polar = ZGConversionHelpers::cartesianToPolar(inX, inY);
-    mAngle = polar.angle;
-    mDistance = polar.distance;
+    if (_assignMidiChannel()) {
+        auto polar = ZGConversionHelpers::cartesianToPolar(inX, inY);
+        mAngle = polar.angle;
+        mDistance = polar.distance;
 
-    mSpeedTracker = 0;
+        mSpeedTracker = 0;
 
-    _playMidi();
+        _playMidi();
+    }
 }
 
 ZGObject::~ZGObject() = default;
@@ -57,16 +74,30 @@ void ZGObject::flagForRemoval(bool inShouldRemove) {
 const bool & ZGObject::requestToRemove() const {
     if (mRemoveFlag) {
         usbMIDI.sendNoteOff(currentMidiNote, 127, mMidiChannel);
+        _releaseMidiChannel();
     }
     return mRemoveFlag;
 }
 
-int ZGObject::_assignMidiChannel() {
-    MIDI_INDEX += 1;
-    if (MIDI_INDEX > 16) {
-        MIDI_INDEX = 2;
+bool ZGObject::_assignMidiChannel() {
+    for (int i = 0; i < 15; i++){
+        if (!isChannelAssigned[i]) {
+            isChannelAssigned[i] = true;
+            mMidiChannel = i + 2;
+            return true;
+        }
     }
-    return MIDI_INDEX;
+    flagForRemoval(true);
+    return false;
+
+}
+
+void ZGObject::_releaseMidiChannel() const {
+    if (mMidiChannel < 2){
+        return;
+    } else {
+        isChannelAssigned[mMidiChannel - 2] = false;
+    }
 }
 
 void ZGObject::_calculateMidi(){

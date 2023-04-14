@@ -11,8 +11,12 @@
 #include <vector>
 #include <cmath>
 #include "ZGObject.h"
+#include <unordered_map>
 
 #pragma once
+namespace {
+    static const bool USE_DBSCAN_METHOD = true;
+}
 
 /**
  * @brief Used for processing point cloud buffers to create clusters which are then matched to internally tracked objects or
@@ -49,10 +53,9 @@ private:
     /**
      * @brief Segments buffer of polar data into clusters using euclidean distance
      * @param inBuffer Buffer will be cleared at the end of the function
-     * @param inClusters Vector will be cleared at the beginning of the function and new data will be written
      * @see processBuffer()
      */
-    void _segmentPointCloud(std::vector<ZGPolarData>& inBuffer, std::vector<std::vector<ZGPoint>>& inClusters) const;
+    void _segmentPointCloud(std::vector<ZGPolarData>& inBuffer);
 
     /**
      * @brief Utility function to find the center point given a cluster of points
@@ -70,9 +73,22 @@ private:
 
     const float mMaxDistance = 150.f; //in cm
     const float mMaxClusterDistance = 70.f;
-    const int mMinPointsPerCluster = 2;
+    const int mMinPointsPerCluster = 10;
+    const float mEpsilon = 30.f;
+
 
     std::vector<std::vector<ZGPoint>> mClusters {};
+    std::vector<ZGPoint> mPointBuffer {};
     std::vector<ZGObject> mTrackedObjects {};
+
+    void _euclideanScan();
+
+    // DBSCAN Functions //
+    int _dbScan();
+
+    std::vector<int> _calculateCluster(ZGPoint point);
+
+    int _expandCluster(ZGPoint &inPoint, int clusterID);
+
 
 };
