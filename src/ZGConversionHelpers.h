@@ -12,9 +12,16 @@
 
 #pragma once
 
+enum class ClusterID {
+    ERROR = -2,
+    NOISE,
+    UNCLASSIFIED
+};
+
 struct ZGPoint {
     float x;
     float y;
+    int clusterID = 0;
 };
 
 struct ZGPolarData {
@@ -24,12 +31,16 @@ struct ZGPolarData {
 
 namespace ZGConversionHelpers {
 
+    inline float getDistance(const ZGPoint& inPointA, const ZGPoint& inPointB) {
+        return std::hypot(inPointA.x - inPointB.x, inPointA.y - inPointB.y);
+    }
+
     /**
      * @brief Utility function to convert cartesian data to polar
      * @param inPointXY ZGPoint X/Y data
      * @return ZGPolarData with angles in degrees and distance in centimeters
      */
-    static inline ZGPolarData cartesianToPolar(ZGPoint inPointXY) {
+    inline ZGPolarData cartesianToPolar(ZGPoint inPointXY) {
         float distance = std::hypot(inPointXY.x, inPointXY.y);
         float angle_radians = std::atan2(inPointXY.y, inPointXY.x);
         float angle_degrees = angle_radians * (180.0f / M_PI);
@@ -46,7 +57,7 @@ namespace ZGConversionHelpers {
      * @param inY Y Coordinate
      * @return ZGPolarData with angles in degrees and distance in centimeters
      */
-    static inline ZGPolarData cartesianToPolar(float inX, float inY) {
+    inline ZGPolarData cartesianToPolar(float inX, float inY) {
         float distance = std::hypot(inX, inY);
         float angle_radians = std::atan2(inY, inX);
         float angle_degrees = angle_radians * (180.0f / M_PI);
@@ -62,7 +73,7 @@ namespace ZGConversionHelpers {
      * @param inPolarCoords ZGPolarData pair of distance in cm and angle in degrees
      * @return X/Y point object
      */
-    static inline ZGPoint polarToCartesian(ZGPolarData inPolarCoords) {
+    inline ZGPoint polarToCartesian(ZGPolarData inPolarCoords) {
         float angle_radians = std::fmod(inPolarCoords.angle, 360.0f) * (M_PI / 180.0f);
         ZGPoint p {};
         p.x = inPolarCoords.distance * std::cos(angle_radians);
@@ -76,7 +87,7 @@ namespace ZGConversionHelpers {
      * @param inDistanceCm Distance in centimeters
      * @return X/Y point object
      */
-    static inline ZGPoint polarToCartesian(float inAngleDegrees, float inDistanceCm) {
+    inline ZGPoint polarToCartesian(float inAngleDegrees, float inDistanceCm) {
         float angle_radians = std::fmod(inAngleDegrees, 360.0f) * (M_PI / 180.0f);
         ZGPoint p {};
         p.x = inDistanceCm * std::cos(angle_radians);

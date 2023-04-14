@@ -52,7 +52,8 @@ private:
     int mMidiChannel = 1;
     int modValue = 0;
 
-    static int _assignMidiChannel();
+    bool _assignMidiChannel();
+    void _releaseMidiChannel() const;
 
     void _calculateMidi();
 
