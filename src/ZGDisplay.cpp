@@ -19,7 +19,7 @@ ZGDisplay::~ZGDisplay() = default;
 
 void ZGDisplay::initialize()
 {
-    ui.begin(LCD_CS_PIN, LCD_DC_PIN, TOUCH_CS_PIN, LCD_ORIENTATION_LANDSCAPE_4PIN_RIGHT, Arial_9_Bold);
+    ui.begin(LCD_CS_PIN, LCD_DC_PIN, TOUCH_CS_PIN, LCD_ORIENTATION_LANDSCAPE_4PIN_LEFT, Arial_9_Bold);
 }
 
 void ZGDisplay::refresh()

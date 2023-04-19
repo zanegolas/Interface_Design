@@ -42,7 +42,7 @@ private:
 
     void _updateLogs();
 
-    const int LIDAR_MOTOR_PIN = 3;
+    const int LIDAR_MOTOR_PIN = 2;
     RPLidar mLidar {};
 
     elapsedMillis mTimer = 0;
