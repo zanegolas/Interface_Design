@@ -17,23 +17,28 @@ ZGDisplay::ZGDisplay(ZGObjectTracker *inObjectTracker, ZGLidar *inLidar)
 
 ZGDisplay::~ZGDisplay() = default;
 
-void ZGDisplay::initialize()
+void ZGDisplay::initialize(TeensyUserInterface& inUI) const
 {
-    ui.begin(LCD_CS_PIN, LCD_DC_PIN, TOUCH_CS_PIN, LCD_ORIENTATION_LANDSCAPE_4PIN_LEFT, Arial_9_Bold);
+    inUI.begin(LCD_CS_PIN, LCD_DC_PIN, TOUCH_CS_PIN, LCD_ORIENTATION_LANDSCAPE_4PIN_LEFT, Arial_9_Bold);
 }
 
-void ZGDisplay::refresh()
+void ZGDisplay::refresh(TeensyUserInterface& inUI, MENU_ITEM* inMainMenu)
 {
-    ui.getTouchEvents();
-    if (ui.checkForTouchEventInRect(TOUCH_PUSHED_EVENT, 0, 0, ui.displaySpaceWidth, ui.displaySpaceHeight)){
+    inUI.getTouchEvents();
+//    if (inUI.checkForTouchEventInRect(TOUCH_PUSHED_EVENT, 0, 0, inUI.displaySpaceWidth, inUI.displaySpaceHeight)){
+    if(inUI.checkForButtonClicked(mDebugButton)){
         showDebugData = !showDebugData;
+        mRedraw = true;
+    }
+    if (inUI.checkForButtonClicked(mRangeButton)){
+        inUI.displayAndExecuteMenu(inMainMenu);
         mRedraw = true;
     }
     if (mRefreshTimer >= 100) {
         if (showDebugData) {
-            printDebugData(mRedraw);
+            printDebugData(inUI, mRedraw);
         } else {
-            plotObjects(mRedraw);
+            plotObjects(inUI, mRedraw);
         }
         mRedraw = false;
         mRefreshTimer = 0;
@@ -42,66 +47,67 @@ void ZGDisplay::refresh()
     }
 }
 
-void ZGDisplay::printDebugData(bool inRedrawAll)
+void ZGDisplay::printDebugData(TeensyUserInterface& inUI, bool inRedrawAll)
 {
     if (inRedrawAll){
-        ui.lcdClearScreen(LCD_BLACK);
+        inUI.lcdClearScreen(LCD_BLACK);
+        inUI.drawButton(mDebugButton);
         auto index = 0;
         for (const auto& category : debugCategories) {
-            ui.lcdSetCursorXY(0, 0 + 12 * index);
-            ui.lcdPrint(category.c_str());
+            inUI.lcdSetCursorXY(0, 0 + 12 * index);
+            inUI.lcdPrint(category.c_str());
             index++;
         }
     }
 
-    printDebugValue(mLidar->getSamplesPerSecond(), 0);
-    printDebugValue(mLidar->getBufferSize(), 1);
-    printDebugValue(mLidar->getTotalLatency(), 2);
-    printDebugValue(mLidar->getProcessingLatency(), 3);
-    printDebugValue(static_cast<int>(mObjectTracker->getObjects().size()), 4);
+    printDebugValue(mLidar->getSamplesPerSecond(), 0, inUI);
+    printDebugValue(mLidar->getBufferSize(), 1, inUI);
+    printDebugValue(mLidar->getTotalLatency(), 2, inUI);
+    printDebugValue(mLidar->getProcessingLatency(), 3, inUI);
+    printDebugValue(static_cast<int>(mObjectTracker->getObjects().size()), 4, inUI);
 }
 
-void ZGDisplay::printDebugValue(int inValue, int inLine)
+void ZGDisplay::printDebugValue(int inValue, int inLine, TeensyUserInterface& inUI)
 {
-    auto cursor_x = ui.lcdStringWidthInPixels(debugCategories[inLine].c_str());
+    auto cursor_x = inUI.lcdStringWidthInPixels(debugCategories[inLine].c_str());
     auto cursor_y = inLine * 12;
     auto string_cast = static_cast<String>(inValue);
     auto print_val = string_cast.c_str();
-    auto width = ui.lcdStringWidthInPixels(print_val);
-    auto height = 12;
+    auto str_width = inUI.lcdStringWidthInPixels(print_val);
+    auto str_height = 12;
 
-    ui.lcdSetCursorXY(cursor_x, cursor_y);
-    ui.lcdDrawFilledRectangle(cursor_x, cursor_y, width, height, LCD_BLACK);
-    ui.lcdPrint(print_val);
+    inUI.lcdSetCursorXY(cursor_x, cursor_y);
+    inUI.lcdDrawFilledRectangle(cursor_x, cursor_y, str_width, str_height, LCD_BLACK);
+    inUI.lcdPrint(print_val);
 }
 
-void ZGDisplay::plotObjects(bool inRedrawAll)
+void ZGDisplay::plotObjects(TeensyUserInterface& inUI, bool inRedrawAll)
 {
-    auto width = 320;
-    auto height = 240;
-    auto center_x = width / 2;
-    auto center_y = height / 2;
+    auto scale = _getScaleFactor();
 
     if (inRedrawAll) {
-        ui.lcdClearScreen(LCD_BLACK);
+        inUI.lcdClearScreen(LCD_BLACK);
+        inUI.drawButton(mRangeButton);
+        inUI.drawButton(mDebugButton);
 
     } else { // Erase previous data
         auto clusters = mDisplayedClusters;
         for (const auto &cluster: clusters) {
             auto object_color = LCD_BLACK;
             for (auto point: cluster) {
-                ui.lcdDrawFilledCircle(center_x + static_cast<int>(point.x), center_y + static_cast<int>(point.y), 1,
-                                       object_color);
+                inUI.lcdDrawFilledCircle(center_x + static_cast<int>(point.x * scale), center_y + static_cast<int>(point.y * scale), 1,
+                                         object_color);
             }
         }
         auto objects = mDisplayedObjects;
         for (const auto& object: objects) {
-            ui.lcdDrawFilledCircle(center_x + static_cast<int>(object.x), center_y + static_cast<int>(object.y), 4,
-                                   LCD_BLACK);
+            inUI.lcdDrawFilledCircle(center_x + static_cast<int>(object.x * scale), center_y + static_cast<int>(object.y * scale), 4,
+                                     LCD_BLACK);
         }
     }
 
-    ui.lcdDrawFilledCircle(center_x, center_y, 2, LCD_RED);
+    inUI.lcdDrawFilledCircle(center_x, center_y, 2, LCD_RED);
+    inUI.lcdDrawCircle(center_x, center_y, center_y - 1, LCD_LIGHTGREY);
 
     // Paint new data
     auto clusters = mObjectTracker->getClusters();
@@ -109,7 +115,7 @@ void ZGDisplay::plotObjects(bool inRedrawAll)
     for (const auto& cluster : clusters) {
         auto object_color = colorArray[index];
         for (auto point : cluster) {
-            ui.lcdDrawFilledCircle(center_x + static_cast<int>(point.x), center_y + static_cast<int>(point.y), 1, object_color);
+            inUI.lcdDrawFilledCircle(center_x + static_cast<int>(point.x * scale), center_y + static_cast<int>(point.y * scale), 1, object_color);
         }
         index++;
         if (index > 5) {
@@ -119,10 +125,17 @@ void ZGDisplay::plotObjects(bool inRedrawAll)
     auto objects = mObjectTracker->getObjects();
     mDisplayedObjects.clear();
     for (const auto& object :objects){
-        ui.lcdDrawFilledCircle(center_x + static_cast<int>(object.getX()), center_y + static_cast<int>(object.getY()), 4, LCD_RED);
+        inUI.lcdDrawFilledCircle(center_x + static_cast<int>(object.getX() * scale), center_y + static_cast<int>(object.getY() * scale), 4, LCD_RED);
         mDisplayedObjects.push_back(object.getPoint());
     }
 
     // Save for next frame
     mDisplayedClusters = clusters;
 }
+
+float ZGDisplay::_getScaleFactor() {
+    return 120 / mObjectTracker->getMaxDistance() ;
+}
+
+
+

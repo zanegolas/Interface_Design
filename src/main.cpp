@@ -11,8 +11,10 @@
 #include "ZGLidar.h"
 #include "ZGDisplay.h"
 #include <memory>
+#include "TeensyUserInterface.h"
 
 // Global Objects
+TeensyUserInterface ui;
 std::unique_ptr<ZGObjectTracker> mObjectTracker;
 std::unique_ptr<ZGLidar> mLidar;
 std::unique_ptr<ZGDisplay> mDisplay;
@@ -27,9 +29,26 @@ void setup() {
     mDisplay = std::make_unique<ZGDisplay>(mObjectTracker.get(), mLidar.get());
 
     mLidar->initialize();
-    mDisplay->initialize();
+    mDisplay->initialize(ui);
     usbMIDI.begin();
 }
+
+//
+// for each menu, create a forward declaration with "extern"
+//
+extern MENU_ITEM mainMenu[];
+
+void commandAbout();
+
+
+//
+// main menu, NOTE HOW 4TH COLUMN IN FIRST LINE IS SET TO "NULL", THIS DISPLAYS THE "MENU" BUTTON
+//
+MENU_ITEM mainMenu[] = {
+        {MENU_ITEM_TYPE_MAIN_MENU_HEADER,  "Settings",         MENU_COLUMNS_1,            NULL},
+        {MENU_ITEM_TYPE_COMMAND,           "About",                      commandAbout,              NULL},
+        {MENU_ITEM_TYPE_END_OF_MENU,       "",                           NULL,                      NULL}
+};
 
 /**
  * MAIN PROGRAM
@@ -37,8 +56,40 @@ void setup() {
 
 void loop() {
    mLidar->run();
-   mDisplay->refresh();
+   mDisplay->refresh(ui, mainMenu);
 
     // Prevent errors when incoming usb midi buffer is ignored
     while(usbMIDI.read()){}
+}
+
+void commandAbout() {
+//
+    // clear the screen and draw title bar showing with the "Back" button
+    //
+    ui.drawTitleBarWithBackButton("About This Program");
+    ui.clearDisplaySpace();
+
+    //
+    // show some info in the display space
+    //
+    int y = 70;
+    int ySpacing = 17;
+    ui.lcdSetCursorXY(ui.displaySpaceCenterX, y);
+    ui.lcdPrintCentered("Test");
+
+    y += ySpacing * 2;
+    ui.lcdSetCursorXY(ui.displaySpaceCenterX, y);
+    ui.lcdPrintCentered("This is a Test");
+
+
+    //
+    // wait for the user to press the "Back" button, then return to the main menu
+    //
+    while(true)
+    {
+        ui.getTouchEvents();
+
+        if (ui.checkForBackButtonClicked())
+            return;
+    }
 }

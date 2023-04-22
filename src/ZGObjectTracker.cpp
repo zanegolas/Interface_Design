@@ -221,3 +221,11 @@ void ZGObjectTracker::_euclideanScan()
     }
 }
 
+const float &ZGObjectTracker::getMaxDistance() {
+    return mMaxDistance;
+}
+
+void ZGObjectTracker::setMaxDistance(float inCentimeters) {
+    mMaxDistance = inCentimeters;
+}
+

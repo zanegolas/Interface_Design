@@ -48,6 +48,10 @@ public:
      */
     const std::vector<ZGObject> &getObjects() const;
 
+    const float& getMaxDistance();
+
+    void setMaxDistance(float inCentimeters);
+
 private:
 
     /**
@@ -71,7 +75,7 @@ private:
      */
     void _updateTrackedObjects();
 
-    const float mMaxDistance = 150.f; //in cm
+    float mMaxDistance = 150.f; //in cm
     const float mMaxClusterDistance = 70.f;
     const int mMinPointsPerCluster = 10;
     const float mEpsilon = 30.f;
