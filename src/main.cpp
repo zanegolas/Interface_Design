@@ -83,9 +83,13 @@ void commandAbout() {
     ui.lcdSetCursorXY(ui.displaySpaceCenterX, y);
     ui.lcdPrintCentered("This project was developed for the interface");
 
-    y += ySpacing * 2;
+    y += ySpacing * 1;
     ui.lcdSetCursorXY(ui.displaySpaceCenterX, y);
     ui.lcdPrintCentered("design class at CalArts in 2023 by Zane Golas.");
+
+    y += ySpacing * 2;
+    ui.lcdSetCursorXY(ui.displaySpaceCenterX, y);
+    ui.lcdPrintCentered("Version 1.0");
 
 
     //
