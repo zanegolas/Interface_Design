@@ -20,6 +20,8 @@ ZGDisplay::~ZGDisplay() = default;
 void ZGDisplay::initialize(TeensyUserInterface& inUI) const
 {
     inUI.begin(LCD_CS_PIN, LCD_DC_PIN, TOUCH_CS_PIN, LCD_ORIENTATION_LANDSCAPE_4PIN_LEFT, Arial_9_Bold);
+    inUI.setTitleBarColors(aerospace_orange, LCD_WHITE, LCD_BLACK, aerospace_orange);
+    inUI.setMenuColors(LCD_BLACK, aerospace_orange, LCD_BLACK, LCD_DARKGREY, LCD_WHITE);
 }
 
 void ZGDisplay::refresh(TeensyUserInterface& inUI, MENU_ITEM* inMainMenu)
