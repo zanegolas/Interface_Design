@@ -11,9 +11,16 @@
 #include "ZGLidar.h"
 #include <TeensyUserInterface.h>
 #include "assets/font_Inter.h"
+#include "assets/font_ChakraPetch-SemiBold.h"
 #include <memory>
 #include "assets/SettingsButtonDefault.c"
 #include "assets/SettingsButtonPressed.c"
+#include "assets/BackButtonDefault.c"
+#include "assets/BackButtonPressed.c"
+#include "assets/SelectButtonDefault.c"
+#include "assets/SelectButtonPressed.c"
+#include "assets/OkButtonDefault.c"
+#include "assets/SettingsBackplate.c"
 
 #pragma once
 
@@ -38,9 +45,9 @@ public:
     /* */
     ~ZGDisplay();
 
-    void initialize(TeensyUserInterface& inUI) const;
+    void initialize();
 
-    void refresh(TeensyUserInterface& inUI, MENU_ITEM* inMainMenu);
+    void refresh();
 
     void printDebugData(TeensyUserInterface& inUI, bool inRedrawAll = false);
 
@@ -54,11 +61,16 @@ private:
     const int LCD_DC_PIN = 9;
     const int TOUCH_CS_PIN = 8;
 
+    TeensyUserInterface mUI;
+
     bool showDebugData = false;
     bool mRedraw = true;
     elapsedMillis mRefreshTimer = 0;
 
-    BUTTON_IMAGE mMenuButton {SettingsButtonDefault, SettingsButtonPressed, 287, 213, 40 , 40};
+    BUTTON_IMAGE mMenuButton {"",SettingsButtonDefault, SettingsButtonPressed, 287, 213, 40 , 40, ghost_white, Inter_12};
+    BUTTON_IMAGE mBackButton {"",BackButtonDefault, BackButtonPressed, 44, height - 14, 88 , 29, ghost_white, Inter_12};
+    BUTTON_IMAGE mOkButton {"OK", OkButtonDefault, SelectButtonPressed, 82, 203, 144 , 50, ghost_white, ChakraPetchSemiBold_12};
+    BUTTON_IMAGE mCancelButton {"CANCEL", SelectButtonDefault, SelectButtonPressed, 237, 203, 144 , 50, ghost_white, ChakraPetchSemiBold_12};
 
     const uint16_t colorArray [6] {
             LCD_BLUE,
@@ -84,6 +96,12 @@ private:
     std::vector<std::vector<ZGPoint>> mDisplayedClusters;
 
     float _getScaleFactor();
+
+    void showMainMenu(TeensyUserInterface& ui);
+    void showAbout(TeensyUserInterface& ui);
+    void showScan();
+    void showDisplay();
+    void showMidi();
 
 
 

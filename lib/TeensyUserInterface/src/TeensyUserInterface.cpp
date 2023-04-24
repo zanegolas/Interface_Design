@@ -1252,7 +1252,7 @@ void TeensyUserInterface::drawButton(BUTTON_IMAGE &uiButton)
     int buttonY = uiButton.centerY - uiButton.height/2;
     if (buttonY < 0) buttonY = 0;
 
-    drawButton(uiButton.imageDefault, buttonX, buttonY, uiButton.width, uiButton.height);
+    drawButton(uiButton.labelText, uiButton.imageDefault, buttonX, buttonY, uiButton.width, uiButton.height, uiButton.buttonTextColor, uiButton.buttonFont);
 }
 
 //
@@ -1262,19 +1262,14 @@ void TeensyUserInterface::drawButton(BUTTON_IMAGE &uiButton)
 //
 void TeensyUserInterface::drawButton(BUTTON_IMAGE &uiButton, boolean showButtonTouchedFlg)
 {
-    uint16_t* buttonImage;
+    const uint16_t* buttonImage = (showButtonTouchedFlg) ? uiButton.imagePressed : uiButton.imageDefault;
 
     int buttonX = uiButton.centerX - uiButton.width/2;
     if (buttonX < 0) buttonX = 0;
     int buttonY = uiButton.centerY - uiButton.height/2;
     if (buttonY < 0) buttonY = 0;
 
-    if (showButtonTouchedFlg)
-        buttonImage = uiButton.imagePressed;
-    else
-        buttonImage = uiButton.imageDefault;
-
-    drawButton(buttonImage, buttonX, buttonY, uiButton.width, uiButton.height);
+    drawButton(uiButton.labelText, buttonImage, buttonX, buttonY, uiButton.width, uiButton.height, uiButton.buttonTextColor, uiButton.buttonFont);
 }
 
 //
@@ -1411,10 +1406,14 @@ void TeensyUserInterface::drawButton(const char *labelText, int buttonX, int but
 //          buttonX, buttonY = screen coords for the button's upper left corner
 //          buttonWidth, buttonHeight = size of the button
 //
-void TeensyUserInterface::drawButton(uint16_t* buttonImage, int buttonX, int buttonY, int buttonWidth,
-                                     int buttonHeight)
+void TeensyUserInterface::drawButton(const char *buttonText,const uint16_t* buttonImage, int buttonX, int buttonY, int buttonWidth,
+                                     int buttonHeight, uint16_t buttonTextColor, const ui_font &buttonFont)
 {
     lcdDrawImage(buttonX, buttonY, buttonWidth, buttonHeight, buttonImage);
+    lcdSetFont(buttonFont);
+    lcdSetFontColor(buttonTextColor);
+    lcdSetCursorXY(buttonX + buttonWidth/2, buttonY + (buttonHeight / 2) - (lcdGetFontHeightWithoutDecenders()/2));
+    lcdPrintCentered(buttonText);
 }
 
 
@@ -1823,7 +1822,7 @@ void TeensyUserInterface::drawNumberBox(NUMBER_BOX &numberBox)
   if (numberBox.labelText[0] != 0)
   {
     int textHeight = lcdGetFontHeightWithDecentersAndLineSpacing();
-    lcdSetCursorXY(numberX + numberWidth/2, topY - ((textHeight * 16) / 10));
+    lcdSetCursorXY(numberX + numberWidth/2, topY - ((textHeight * 12) / 10));
     lcdPrintCentered(numberBox.labelText);
   }
 }
@@ -2077,6 +2076,28 @@ void TeensyUserInterface::drawNumberInNumberBox(NUMBER_BOX &numberBox)
   int numberWidth;
   int height;
 
+    const String notes [12] {
+            "C",
+            "C#/Db",
+            "D",
+            "D#/Eb",
+            "E",
+            "F",
+            "F#/Gb",
+            "G",
+            "G#/Ab",
+            "A",
+            "A#/Bb",
+            "B"
+    };
+
+    const String scales [3] {
+            "Chromatic",
+            "Major",
+            "Minor"
+    };
+
+
   //
   // get the coordinates of this Number Box
   //
@@ -2089,13 +2110,20 @@ void TeensyUserInterface::drawNumberInNumberBox(NUMBER_BOX &numberBox)
   lcdSetFontColor(menuButtonTextColor);
   int fontHeight = lcdGetFontHeightWithoutDecenders();
   int textY = numberBox.centerY -  fontHeight/2;
-  lcdDrawFilledRectangle(numberX+3, textY, numberWidth-6, fontHeight + 1, menuBackgroundColor);
+  lcdDrawFilledRectangle(numberX+3, textY-1, numberWidth-6, fontHeight + 3, menuBackgroundColor);
 
   //
   // draw the number
   //
   lcdSetCursorXY(numberX + numberWidth/2, textY);
-  lcdPrintCentered(numberBox.value);
+  if (numberBox.isNoteBox){
+      lcdPrintCentered(notes[numberBox.value].c_str());
+  } else if (numberBox.isScaleBox) {
+      lcdPrintCentered(scales[numberBox.value].c_str());
+  } else {
+      lcdPrintCentered(numberBox.value);
+  }
+
 }
 
 
@@ -2525,7 +2553,7 @@ void TeensyUserInterface::drawSelectionBox(SELECTION_BOX &selectionBox)
   if (selectionBox.labelText[0] != 0)
   {
     int textHeight = lcdGetFontHeightWithDecentersAndLineSpacing();
-    lcdSetCursorXY(X-1 + overallWidth/2, Y - ((textHeight * 16) / 10));
+    lcdSetCursorXY(X-1 + overallWidth/2, Y - ((textHeight * 12) / 10));
     lcdPrintCentered(selectionBox.labelText);
   }
 }

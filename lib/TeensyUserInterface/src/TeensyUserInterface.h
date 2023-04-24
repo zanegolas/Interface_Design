@@ -111,12 +111,15 @@ typedef struct
 //
 typedef struct
 {
+    const char *labelText;
     const uint16_t *imageDefault;
     const uint16_t *imagePressed;
     int centerX;
     int centerY;
     int width;
     int height;
+    uint16_t buttonTextColor;
+    const ui_font &buttonFont;
 } BUTTON_IMAGE;
 
 
@@ -134,6 +137,8 @@ typedef struct
   int centerY;
   int width;
   int height;
+  bool isNoteBox = false;
+  bool isScaleBox = false;
 } NUMBER_BOX;
 
 
@@ -273,7 +278,7 @@ class TeensyUserInterface
     void drawButton(BUTTON_IMAGE &uiButton, boolean buttonSelectedFlg);
     void drawButton(const char *buttonText, boolean buttonSelectedFlg, int buttonX, int buttonY, int buttonWidth, int buttonHeight);
     void drawButton(const char *buttonText, int buttonX, int buttonY, int buttonWidth, int buttonHeight, uint16_t buttonColor, uint16_t buttonFrameColor, uint16_t buttonTextColor, const ui_font &buttonFont);
-    void drawButton(uint16_t* buttonImage, int buttonX, int buttonY, int buttonWidth, int buttonHeight);
+    void drawButton(const char *buttonText, const uint16_t* buttonImage, int buttonX, int buttonY, int buttonWidth, int buttonHeight, uint16_t buttonTextColor, const ui_font &buttonFont);
     boolean breakStringAtWhiteSpace(const char *srcString, int *srcIndex, char *destString, int destBufferLength, int breakAtWhiteCount);
     boolean checkForButtonClicked(BUTTON &uiButton);
     boolean checkForButtonClicked(BUTTON_EXTENDED &uiButton);
