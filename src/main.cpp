@@ -28,8 +28,8 @@ void setup() {
     mLidar = std::make_unique<ZGLidar>(mObjectTracker.get());
     mDisplay = std::make_unique<ZGDisplay>(mObjectTracker.get(), mLidar.get());
 
-    mLidar->initialize();
     mDisplay->initialize(ui);
+    mLidar->initialize();
     usbMIDI.begin();
 }
 

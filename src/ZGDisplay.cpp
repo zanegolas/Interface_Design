@@ -8,6 +8,7 @@
 
 
 #include "ZGDisplay.h"
+#include "assets/LaunchScreen.c"
 
 ZGDisplay::ZGDisplay(ZGObjectTracker *inObjectTracker, ZGLidar *inLidar)
 {
@@ -20,6 +21,7 @@ ZGDisplay::~ZGDisplay() = default;
 void ZGDisplay::initialize(TeensyUserInterface& inUI) const
 {
     inUI.begin(LCD_CS_PIN, LCD_DC_PIN, TOUCH_CS_PIN, LCD_ORIENTATION_LANDSCAPE_4PIN_LEFT, Arial_9_Bold);
+    inUI.lcdDrawImage(0, 0, width, height, LaunchScreen);
     inUI.setTitleBarColors(aerospace_orange, LCD_WHITE, LCD_BLACK, aerospace_orange);
     inUI.setMenuColors(LCD_BLACK, aerospace_orange, LCD_BLACK, LCD_DARKGREY, LCD_WHITE);
 }
