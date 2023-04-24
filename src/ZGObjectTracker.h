@@ -14,9 +14,6 @@
 #include <unordered_map>
 
 #pragma once
-namespace {
-    static const bool USE_DBSCAN_METHOD = true;
-}
 
 /**
  * @brief Used for processing point cloud buffers to create clusters which are then matched to internally tracked objects or
@@ -48,9 +45,21 @@ public:
      */
     const std::vector<ZGObject> &getObjects() const;
 
-    const float& getMaxDistance();
+    const float& getMaxDistance() const;
 
     void setMaxDistance(float inCentimeters);
+
+    const bool& getScanMode() const;
+
+    void setScanMode(bool useDBSCAN);
+
+    const int& getRootNote() const;
+
+    void setRootNote(int inNote);
+
+    const int& getScaleType() const;
+
+    void setScaleType(int inScaleType);
 
 private:
 
@@ -79,6 +88,10 @@ private:
     const float mMaxClusterDistance = 70.f;
     const int mMinPointsPerCluster = 10;
     const float mEpsilon = 30.f;
+    int mScaleType = 0;
+    int mRootNote = 0;
+
+    bool USE_DBSCAN_METHOD = true;
 
 
     std::vector<std::vector<ZGPoint>> mClusters {};

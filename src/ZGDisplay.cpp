@@ -110,14 +110,26 @@ void ZGDisplay::plotObjects(TeensyUserInterface& inUI, bool inRedrawAll)
         inUI.lcdSetFontColor(ghost_white);
 
         inUI.lcdSetCursorXY(71, 23);
-        inUI.lcdPrintRightJustified("Chromatic");
+        if (mObjectTracker->getScaleType() == 0) {
+            inUI.lcdPrintRightJustified("Chromatic");
+        } else {
+            inUI.lcdPrintRightJustified(ZGConversionHelpers::scaleStrings[mObjectTracker->getScaleType()].c_str());
+            inUI.lcdSetCursorXY(55, 23);
+            inUI.lcdPrintRightJustified(ZGConversionHelpers::noteStrings[mObjectTracker->getRootNote()].c_str());
+        }
+
 
         inUI.lcdSetCursorXY(249, 23);
         inUI.lcdPrint((int)mObjectTracker->getMaxDistance());
         inUI.lcdPrint("cm");
 
         inUI.lcdSetCursorXY(67, 215);
-        inUI.lcdPrintRightJustified("DBSCAN");
+        if (mObjectTracker->getScanMode()) {
+            inUI.lcdPrintRightJustified("DBSCAN");
+        } else {
+            inUI.lcdPrintRightJustified("Distance");
+        }
+
 
     } else { // Erase previous data
         auto clusters = mDisplayedClusters;
@@ -293,7 +305,7 @@ void ZGDisplay::showScan()
 
     SELECTION_BOX mode_box;
     mode_box.labelText = "Clustering Algorithm Mode";
-    mode_box.value = 1;	 // set default value, 0 is 1st choice
+    mode_box.value = mObjectTracker->getScanMode();	 // set default value, 0 is 1st choice
     mode_box.choice0Text = "Distance";
     mode_box.choice1Text = "DBSCAN";
     mode_box.choice2Text = "";
@@ -329,6 +341,7 @@ void ZGDisplay::showScan()
             // user OK pressed, get the value from the Number Box and display it
             //
             mObjectTracker->setMaxDistance(static_cast<float>(range_box.value));
+            mObjectTracker->setScanMode(mode_box.value);
             return;
         }
 
@@ -414,7 +427,7 @@ void ZGDisplay::showMidi()
     //
     NUMBER_BOX note_box;
     note_box.labelText     = "Root Note";
-    note_box.value         = 0;
+    note_box.value         = mObjectTracker->getRootNote();
     note_box.minimumValue  = 0;
     note_box.maximumValue  = 11;
     note_box.stepAmount    = 1;
@@ -427,7 +440,7 @@ void ZGDisplay::showMidi()
 
     NUMBER_BOX scale_box;
     scale_box.labelText     = "Scale Type";
-    scale_box.value         = 0;
+    scale_box.value         = mObjectTracker->getScaleType();
     scale_box.minimumValue  = 0;
     scale_box.maximumValue  = 2;
     scale_box.stepAmount    = 1;
@@ -459,6 +472,8 @@ void ZGDisplay::showMidi()
         //
         if (mUI.checkForButtonClicked(mOkButton))
         {
+            mObjectTracker->setRootNote(note_box.value);
+            mObjectTracker->setScaleType(scale_box.value);
             //
             // user OK pressed, get the value from the Number Box and display it
             //

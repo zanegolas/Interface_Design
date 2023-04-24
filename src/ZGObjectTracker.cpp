@@ -85,7 +85,7 @@ void ZGObjectTracker::_updateTrackedObjects()
         }
         // If we don't find a match we add a new tracked object;
         if (!found_match) {
-            ZGObject new_object(center.x, center.y);
+            ZGObject new_object(center.x, center.y, mRootNote, mScaleType, mMaxDistance);
             mTrackedObjects.push_back(new_object);
         }
     }
@@ -221,11 +221,44 @@ void ZGObjectTracker::_euclideanScan()
     }
 }
 
-const float &ZGObjectTracker::getMaxDistance() {
+const float &ZGObjectTracker::getMaxDistance() const {
     return mMaxDistance;
 }
 
 void ZGObjectTracker::setMaxDistance(float inCentimeters) {
     mMaxDistance = inCentimeters;
+    for (auto& object : mTrackedObjects) {
+        object.updateDistance(mMaxDistance);
+    }
+}
+
+const bool &ZGObjectTracker::getScanMode() const {
+    return USE_DBSCAN_METHOD;
+}
+
+void ZGObjectTracker::setScanMode(bool useDBSCAN) {
+    USE_DBSCAN_METHOD = useDBSCAN;
+}
+
+const int &ZGObjectTracker::getRootNote() const {
+    return mRootNote;
+}
+
+void ZGObjectTracker::setRootNote(int inNote) {
+    mRootNote = inNote;
+    for (auto& object : mTrackedObjects) {
+        object.updateRootNote(mRootNote);
+    }
+}
+
+const int &ZGObjectTracker::getScaleType() const {
+    return mScaleType;
+}
+
+void ZGObjectTracker::setScaleType(int inScaleType) {
+    mScaleType = inScaleType;
+    for (auto& object : mTrackedObjects) {
+        object.updateScaleType(mScaleType);
+    }
 }
 

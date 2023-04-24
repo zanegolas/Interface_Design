@@ -14,7 +14,7 @@
 class ZGObject {
 public:
 
-    ZGObject(float inX, float inY);
+    ZGObject(float inX, float inY, int inRoot, int inScaleType, float inDistance);
 
     ~ZGObject();
 
@@ -30,6 +30,12 @@ public:
 
     const bool& requestToRemove() const;
 
+    void updateRootNote(int inNewRoot);
+
+    void updateDistance(float inNewDistance);
+
+    void updateScaleType(int inNewType);
+
 private:
 
     float mX = 0;
@@ -43,14 +49,17 @@ private:
 
     elapsedMillis mSpeedTracker = 0;
 
-    static constexpr double midi_factor = 12. / 360.;
-    static constexpr float mod_factor = 127.f / 150.f;
+    double midi_factor = 12. / 360.;
+    float mod_factor = 127.f / 150.f;
 
     //MIDI
     int currentMidiNote = 0;
     int newMidiNote = 0;
     int mMidiChannel = 1;
     int modValue = 0;
+
+    int mRootNote = 48; //C3
+    int mScaleType = 0; //Chromatic
 
     bool _assignMidiChannel();
     void _releaseMidiChannel() const;

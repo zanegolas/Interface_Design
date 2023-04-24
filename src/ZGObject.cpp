@@ -28,9 +28,12 @@ namespace {
     };
 }
 
-ZGObject::ZGObject(float inX, float inY) {
+ZGObject::ZGObject(float inX, float inY, int inRoot, int inScaleType, float inDistance) {
     mX = inX;
     mY = inY;
+    updateRootNote(inRoot);
+    updateScaleType(inScaleType);
+    updateDistance(inDistance);
     if (_assignMidiChannel()) {
         auto polar = ZGConversionHelpers::cartesianToPolar(inX, inY);
         mAngle = polar.angle;
@@ -101,7 +104,13 @@ void ZGObject::_releaseMidiChannel() const {
 }
 
 void ZGObject::_calculateMidi(){
-    newMidiNote = static_cast<int>(mAngle * midi_factor) + 50;
+    auto degree = static_cast<int>(mAngle * midi_factor);
+    if (mScaleType == 1) {
+        degree = ZGConversionHelpers::convertToMajor(degree);
+    } else if (mScaleType == 2) {
+        degree = ZGConversionHelpers::convertToMinor(degree);
+    }
+    newMidiNote = degree + mRootNote;
     modValue = 127 - static_cast<int>(mDistance * mod_factor);
 }
 
@@ -126,4 +135,21 @@ const float &ZGObject::getY() const {
 
 ZGPoint ZGObject::getPoint() const {
     return ZGPoint{mX, mY};
+}
+
+void ZGObject::updateRootNote(int inNewRoot) {
+    mRootNote = inNewRoot + 48;
+}
+
+void ZGObject::updateScaleType(int inNewType) {
+    if (inNewType == 0){
+        midi_factor = 12. / 360.;
+    } else {
+        midi_factor = 7. / 360.;
+    }
+    mScaleType = inNewType;
+}
+
+void ZGObject::updateDistance(float inNewDistance) {
+    mod_factor = 127.f / inNewDistance;
 }

@@ -94,4 +94,87 @@ namespace ZGConversionHelpers {
         p.y = inDistanceCm * std::sin(angle_radians);
         return p;
     }
+
+    inline int convertToMajor(int inDegree) {
+        int noteOffset = 0;
+        switch (inDegree) {
+            case 1: // first degree of the scale
+                noteOffset = 0;
+                break;
+            case 2: // second degree of the scale
+                noteOffset = 2;
+                break;
+            case 3: // third degree of the scale
+                noteOffset = 4;
+                break;
+            case 4: // fourth degree of the scale
+                noteOffset = 5;
+                break;
+            case 5: // fifth degree of the scale
+                noteOffset = 7;
+                break;
+            case 6: // sixth degree of the scale
+                noteOffset = 9;
+                break;
+            case 7: // seventh degree of the scale
+                noteOffset = 11;
+                break;
+            default:
+                return 0;
+        }
+        return noteOffset;
+    }
+
+    inline int convertToMinor(int inDegree) {
+        int noteOffset = 0;
+        switch (inDegree) {
+            case 1: // first degree of the scale
+                noteOffset = 0;
+                break;
+            case 2: // second degree of the scale
+                noteOffset = 2;
+                break;
+            case 3: // third degree of the scale
+                noteOffset = 3;
+                break;
+            case 4: // fourth degree of the scale
+                noteOffset = 5;
+                break;
+            case 5: // fifth degree of the scale
+                noteOffset = 7;
+                break;
+            case 6: // sixth degree of the scale
+                noteOffset = 8;
+                break;
+            case 7: // seventh degree of the scale
+                noteOffset = 10;
+                break;
+            default:
+                return 0;
+        }
+        return noteOffset;
+    }
+
+    const String noteStrings [12] {
+            "C",
+            "C#/Db",
+            "D",
+            "D#/Eb",
+            "E",
+            "F",
+            "F#/Gb",
+            "G",
+            "G#/Ab",
+            "A",
+            "A#/Bb",
+            "B"
+    };
+
+    const String scaleStrings [3] {
+            "Chromatic",
+            "M",
+            "m"
+    };
+
+
 }
