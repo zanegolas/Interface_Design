@@ -25,13 +25,10 @@ void ZGDisplay::initialize(TeensyUserInterface& inUI) const
 void ZGDisplay::refresh(TeensyUserInterface& inUI, MENU_ITEM* inMainMenu)
 {
     inUI.getTouchEvents();
-//    if (inUI.checkForTouchEventInRect(TOUCH_PUSHED_EVENT, 0, 0, inUI.displaySpaceWidth, inUI.displaySpaceHeight)){
-    if(inUI.checkForButtonClicked(mDebugButton)){
-        showDebugData = !showDebugData;
-        mRedraw = true;
-    }
-    if (inUI.checkForButtonClicked(mRangeButton)){
+    if(inUI.checkForButtonClicked(mMenuButton)){
+        mLidar->pause();
         inUI.displayAndExecuteMenu(inMainMenu);
+        mLidar->resume();
         mRedraw = true;
     }
     if (mRefreshTimer >= 100) {
@@ -51,7 +48,7 @@ void ZGDisplay::printDebugData(TeensyUserInterface& inUI, bool inRedrawAll)
 {
     if (inRedrawAll){
         inUI.lcdClearScreen(LCD_BLACK);
-        inUI.drawButton(mDebugButton);
+        inUI.drawButton(mMenuButton);
         auto index = 0;
         for (const auto& category : debugCategories) {
             inUI.lcdSetCursorXY(0, 0 + 12 * index);
@@ -87,8 +84,7 @@ void ZGDisplay::plotObjects(TeensyUserInterface& inUI, bool inRedrawAll)
 
     if (inRedrawAll) {
         inUI.lcdClearScreen(LCD_BLACK);
-        inUI.drawButton(mRangeButton);
-        inUI.drawButton(mDebugButton);
+        inUI.drawButton(mMenuButton);
 
     } else { // Erase previous data
         auto clusters = mDisplayedClusters;
@@ -106,8 +102,8 @@ void ZGDisplay::plotObjects(TeensyUserInterface& inUI, bool inRedrawAll)
         }
     }
 
-    inUI.lcdDrawFilledCircle(center_x, center_y, 2, LCD_RED);
-    inUI.lcdDrawCircle(center_x, center_y, center_y - 1, LCD_LIGHTGREY);
+    inUI.lcdDrawFilledCircle(center_x, center_y, 2, aerospace_orange);
+    inUI.lcdDrawCircle(center_x, center_y, center_y - 1, LCD_DARKGREY);
 
     // Paint new data
     auto clusters = mObjectTracker->getClusters();

@@ -26,6 +26,10 @@ public:
 
     void run();
 
+    void pause();
+
+    void resume();
+
     const int& getSamplesPerSecond() const;
 
     const int& getTotalLatency() const;

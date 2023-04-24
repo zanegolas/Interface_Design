@@ -20,6 +20,9 @@ namespace {
     const auto height = 240;
     constexpr auto center_x = width / 2;
     constexpr auto center_y = height / 2;
+    const uint16_t aerospace_orange = 0xFA80;
+    const uint16_t ghost_white = 0xFFDF;
+    const uint16_t ubus_green = 0x0744;
 }
 
 
@@ -51,8 +54,7 @@ private:
     bool mRedraw = true;
     elapsedMillis mRefreshTimer = 0;
 
-    BUTTON mRangeButton {"Range",    75, height - 25,  150 , 50};
-    BUTTON mDebugButton {"Debug",    width - 75, height - 25,  150 , 50};
+    BUTTON_EXTENDED mMenuButton {"Menu", width - 34, height - 20, 68 , 40, LCD_BLACK, aerospace_orange, aerospace_orange, ghost_white, Arial_10_Bold};
 
     const uint16_t colorArray [6] {
             LCD_BLUE,
@@ -79,5 +81,9 @@ private:
 
     float _getScaleFactor();
 
+
+
 };
+
+
 

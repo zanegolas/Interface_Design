@@ -98,3 +98,11 @@ const int &ZGLidar::getProcessingLatency() const {
 const int &ZGLidar::getBufferSize() const {
     return mBufferSize;
 }
+
+void ZGLidar::pause() {
+    mLidar.stop();
+}
+
+void ZGLidar::resume() {
+    mLidar.startScanExpress(true, RPLIDAR_CONF_SCAN_COMMAND_EXPRESS);
+}

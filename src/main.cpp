@@ -39,6 +39,7 @@ void setup() {
 extern MENU_ITEM mainMenu[];
 
 void commandAbout();
+void commandSetRange();
 
 
 //
@@ -46,6 +47,7 @@ void commandAbout();
 //
 MENU_ITEM mainMenu[] = {
         {MENU_ITEM_TYPE_MAIN_MENU_HEADER,  "Settings",         MENU_COLUMNS_1,            NULL},
+        {MENU_ITEM_TYPE_COMMAND,           "Set Range",                      commandSetRange,              NULL},
         {MENU_ITEM_TYPE_COMMAND,           "About",                      commandAbout,              NULL},
         {MENU_ITEM_TYPE_END_OF_MENU,       "",                           NULL,                      NULL}
 };
@@ -66,7 +68,7 @@ void commandAbout() {
 //
     // clear the screen and draw title bar showing with the "Back" button
     //
-    ui.drawTitleBarWithBackButton("About This Program");
+    ui.drawTitleBarWithBackButton("About");
     ui.clearDisplaySpace();
 
     //
@@ -75,11 +77,15 @@ void commandAbout() {
     int y = 70;
     int ySpacing = 17;
     ui.lcdSetCursorXY(ui.displaySpaceCenterX, y);
-    ui.lcdPrintCentered("Test");
+    ui.lcdPrintCentered("MPE LiDAR MIDI Interface");
 
     y += ySpacing * 2;
     ui.lcdSetCursorXY(ui.displaySpaceCenterX, y);
-    ui.lcdPrintCentered("This is a Test");
+    ui.lcdPrintCentered("This project was developed for the interface");
+
+    y += ySpacing * 2;
+    ui.lcdSetCursorXY(ui.displaySpaceCenterX, y);
+    ui.lcdPrintCentered("design class at CalArts in 2023 by Zane Golas.");
 
 
     //
@@ -90,6 +96,91 @@ void commandAbout() {
         ui.getTouchEvents();
 
         if (ui.checkForBackButtonClicked())
+            return;
+    }
+}
+
+//
+// menu command to "Set Range"
+//
+void commandSetRange()
+{
+    char sBuffer[25];
+
+    ui.lcdClearScreen(LCD_BLACK);
+    //
+    // draw the title bar and clear the screen
+    //
+    ui.drawTitleBar("Set Max Detection Distance In CM");
+    ui.clearDisplaySpace();
+
+    //
+    // set the size and initial value of the number box
+    //
+    const int numberBoxWidth = 200;
+    const int numberBoxAndButtonsHeight = 35;
+
+    //
+    // define a Number Box so the user can select a numeric value, specify the initial value,
+    // max and min values, and step up/down amount
+    //
+    NUMBER_BOX my_NumberBox;
+    my_NumberBox.labelText     = "Range";
+    my_NumberBox.value         = static_cast<int>(mObjectTracker->getMaxDistance());
+    my_NumberBox.minimumValue  = 50;
+    my_NumberBox.maximumValue  = 1000;
+    my_NumberBox.stepAmount    = 50;
+    my_NumberBox.centerX       = ui.displaySpaceCenterX;
+    my_NumberBox.centerY       = ui.displaySpaceCenterY - 20;
+    my_NumberBox.width         = numberBoxWidth;
+    my_NumberBox.height        = numberBoxAndButtonsHeight;
+    ui.drawNumberBox(my_NumberBox);
+
+
+    //
+    // define and display "OK" and "Cancel" buttons
+    //
+    BUTTON okButton        = {"OK",      ui.displaySpaceCenterX-70, ui.displaySpaceBottomY-35,  120 , numberBoxAndButtonsHeight};
+    ui.drawButton(okButton);
+
+    BUTTON cancelButton    = {"Cancel",  ui.displaySpaceCenterX+70, ui.displaySpaceBottomY-35,  120 , numberBoxAndButtonsHeight};
+    ui.drawButton(cancelButton);
+
+
+    //
+    // process touch events
+    //
+    while(true)
+    {
+        ui.getTouchEvents();
+
+        //
+        // process touch events on the Number Box
+        //
+        ui.checkForNumberBoxTouched(my_NumberBox);
+
+        //
+        // check for touch events on the "OK" button
+        //
+        if (ui.checkForButtonClicked(okButton))
+        {
+            //
+            // user OK pressed, get the value from the Number Box and display it
+            //
+            mObjectTracker->setMaxDistance(static_cast<float>(my_NumberBox.value));
+            sprintf(sBuffer, "Max Range = %d cm", (int)mObjectTracker->getMaxDistance());
+
+            ui.clearDisplaySpace();
+            ui.lcdSetCursorXY(ui.displaySpaceCenterX, ui.displaySpaceCenterY-10);
+            ui.lcdPrintCentered(sBuffer);
+            delay(1500);
+            return;
+        }
+
+        //
+        // check for touch events on the "Cancel" button
+        //
+        if (ui.checkForButtonClicked(cancelButton))
             return;
     }
 }
