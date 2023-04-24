@@ -1242,6 +1242,42 @@ void TeensyUserInterface::drawButton(BUTTON_EXTENDED &uiButtonExt, boolean showB
 }
 
 //
+// draw an Image button
+//  Enter:  uiButton -> the specifications for the button to draw
+//
+void TeensyUserInterface::drawButton(BUTTON_IMAGE &uiButton)
+{
+    int buttonX = uiButton.centerX - uiButton.width/2;
+    if (buttonX < 0) buttonX = 0;
+    int buttonY = uiButton.centerY - uiButton.height/2;
+    if (buttonY < 0) buttonY = 0;
+
+    drawButton(uiButton.imageDefault, buttonX, buttonY, uiButton.width, uiButton.height);
+}
+
+//
+// draw an Image button
+//  Enter:  uiButton -> the specifications for the button to draw
+//          showButtonTouchedFlg = true to draw button showing it's being touched, false to draw normal
+//
+void TeensyUserInterface::drawButton(BUTTON_IMAGE &uiButton, boolean showButtonTouchedFlg)
+{
+    uint16_t* buttonImage;
+
+    int buttonX = uiButton.centerX - uiButton.width/2;
+    if (buttonX < 0) buttonX = 0;
+    int buttonY = uiButton.centerY - uiButton.height/2;
+    if (buttonY < 0) buttonY = 0;
+
+    if (showButtonTouchedFlg)
+        buttonImage = uiButton.imagePressed;
+    else
+        buttonImage = uiButton.imageDefault;
+
+    drawButton(buttonImage, buttonX, buttonY, uiButton.width, uiButton.height);
+}
+
+//
 // draw a rectangular button using the colors and font defined for the menu
 //  Enter:  labelText -> text to display on the button's face
 //          showButtonTouchedFlg = true to draw button showing it's being touched, false to draw normal
@@ -1366,6 +1402,19 @@ void TeensyUserInterface::drawButton(const char *labelText, int buttonX, int but
     lcdSetCursorXY(buttonX + buttonWidth/2, buttonY + (buttonHeight / 2) + 2);  
     lcdPrintCentered(buttonTextLine2);
   }
+}
+
+
+//
+// draw an Image button
+//  Enter:  buttonImage -> Image to display for the button
+//          buttonX, buttonY = screen coords for the button's upper left corner
+//          buttonWidth, buttonHeight = size of the button
+//
+void TeensyUserInterface::drawButton(uint16_t* buttonImage, int buttonX, int buttonY, int buttonWidth,
+                                     int buttonHeight)
+{
+    lcdDrawImage(buttonX, buttonY, buttonWidth, buttonHeight, buttonImage);
 }
 
 
@@ -1495,6 +1544,50 @@ boolean TeensyUserInterface::checkForButtonClicked(BUTTON_EXTENDED &uiButton)
   // most recent event didn't match anything here
   //
   return(false);
+}
+
+//
+// check if user has touched and released the given button, this also highlights the button
+// when the user first touches it
+// Note: getTouchEvents() must be called at the top of the loop that calls this function
+//  Enter:  uiButton -> the button to test
+//  Exit:   true returned if user has touched and released this button, else false
+//
+boolean TeensyUserInterface::checkForButtonClicked(BUTTON_IMAGE &uiButton)
+{
+    //
+    // return if there is No Event
+    //
+    if (touchEventType == TOUCH_NO_EVENT)
+        return(false);
+
+    int X1 = uiButton.centerX - uiButton.width/2;
+    int Y1 = uiButton.centerY - uiButton.height/2;
+    int X2 = X1 + uiButton.width - 1;
+    int Y2 = Y1 + uiButton.height - 1;
+
+    //
+    // check if most recent event was: this button "PUSHED"
+    //
+    if (checkForTouchEventInRect(TOUCH_PUSHED_EVENT, X1, Y1, X2, Y2))
+    {
+        drawButton(uiButton, true);
+        return(false);
+    }
+
+    //
+    // check if most recent event was: this button "RELEASED"
+    //
+    if (checkForTouchEventInRect(TOUCH_RELEASED_EVENT, X1, Y1, X2, Y2))
+    {
+        drawButton(uiButton, false);
+        return(true);
+    }
+
+    //
+    // most recent event didn't match anything here
+    //
+    return(false);
 }
 
 

@@ -10,8 +10,10 @@
 #include "ZGObjectTracker.h"
 #include "ZGLidar.h"
 #include <TeensyUserInterface.h>
-#include <font_ArialBold.h>
+#include "assets/font_Inter.h"
 #include <memory>
+#include "assets/SettingsButtonDefault.c"
+#include "assets/SettingsButtonPressed.c"
 
 #pragma once
 
@@ -23,6 +25,8 @@ namespace {
     const uint16_t aerospace_orange = 0xFA80;
     const uint16_t ghost_white = 0xFFDF;
     const uint16_t ubus_green = 0x0744;
+    const uint16_t cadet_gray = 0x9576;
+    const uint16_t dim_gray = 0x6B4C;
 }
 
 
@@ -54,7 +58,7 @@ private:
     bool mRedraw = true;
     elapsedMillis mRefreshTimer = 0;
 
-    BUTTON_EXTENDED mMenuButton {"Menu", width - 34, height - 20, 68 , 40, LCD_BLACK, aerospace_orange, aerospace_orange, ghost_white, Arial_10_Bold};
+    BUTTON_IMAGE mMenuButton {SettingsButtonDefault, SettingsButtonPressed, 287, 213, 40 , 40};
 
     const uint16_t colorArray [6] {
             LCD_BLUE,

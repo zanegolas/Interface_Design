@@ -75,17 +75,21 @@ void commandAbout() {
     // show some info in the display space
     //
     int y = 70;
-    int ySpacing = 17;
+    int ySpacing = 20;
     ui.lcdSetCursorXY(ui.displaySpaceCenterX, y);
     ui.lcdPrintCentered("MPE LiDAR MIDI Interface");
 
     y += ySpacing * 2;
     ui.lcdSetCursorXY(ui.displaySpaceCenterX, y);
-    ui.lcdPrintCentered("This project was developed for the interface");
+    ui.lcdPrintCentered("This project was developed for the");
 
     y += ySpacing * 1;
     ui.lcdSetCursorXY(ui.displaySpaceCenterX, y);
-    ui.lcdPrintCentered("design class at CalArts in 2023 by Zane Golas.");
+    ui.lcdPrintCentered("interface design class at CalArts in");
+
+    y += ySpacing * 1;
+    ui.lcdSetCursorXY(ui.displaySpaceCenterX, y);
+    ui.lcdPrintCentered("Spring 2023 by Zane Golas.");
 
     y += ySpacing * 2;
     ui.lcdSetCursorXY(ui.displaySpaceCenterX, y);

@@ -106,6 +106,19 @@ typedef struct
   const ui_font &buttonFont;
 } BUTTON_EXTENDED;
 
+//
+// definition of an Image Button, using two images to display pressed and unpressed states
+//
+typedef struct
+{
+    const uint16_t *imageDefault;
+    const uint16_t *imagePressed;
+    int centerX;
+    int centerY;
+    int width;
+    int height;
+} BUTTON_IMAGE;
+
 
 //
 // definition of a integer Number Box 
@@ -256,11 +269,15 @@ class TeensyUserInterface
     void drawButton(BUTTON &uiButton, boolean buttonSelectedFlg);
     void drawButton(BUTTON_EXTENDED &uiButtonExt);
     void drawButton(BUTTON_EXTENDED &uiButtonExt, boolean buttonSelectedFlg);
+    void drawButton(BUTTON_IMAGE &uiButton);
+    void drawButton(BUTTON_IMAGE &uiButton, boolean buttonSelectedFlg);
     void drawButton(const char *buttonText, boolean buttonSelectedFlg, int buttonX, int buttonY, int buttonWidth, int buttonHeight);
     void drawButton(const char *buttonText, int buttonX, int buttonY, int buttonWidth, int buttonHeight, uint16_t buttonColor, uint16_t buttonFrameColor, uint16_t buttonTextColor, const ui_font &buttonFont);
+    void drawButton(uint16_t* buttonImage, int buttonX, int buttonY, int buttonWidth, int buttonHeight);
     boolean breakStringAtWhiteSpace(const char *srcString, int *srcIndex, char *destString, int destBufferLength, int breakAtWhiteCount);
     boolean checkForButtonClicked(BUTTON &uiButton);
     boolean checkForButtonClicked(BUTTON_EXTENDED &uiButton);
+    boolean checkForButtonClicked(BUTTON_IMAGE &uiButton);
     boolean checkForButtonAutoRepeat(BUTTON &uiButton);
     boolean checkForButtonAutoRepeat(BUTTON_EXTENDED &uiButton);
     boolean checkForButtonFirstTouched(BUTTON &uiButton);

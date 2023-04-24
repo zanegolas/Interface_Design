@@ -20,10 +20,10 @@ ZGDisplay::~ZGDisplay() = default;
 
 void ZGDisplay::initialize(TeensyUserInterface& inUI) const
 {
-    inUI.begin(LCD_CS_PIN, LCD_DC_PIN, TOUCH_CS_PIN, LCD_ORIENTATION_LANDSCAPE_4PIN_LEFT, Arial_9_Bold);
+    inUI.begin(LCD_CS_PIN, LCD_DC_PIN, TOUCH_CS_PIN, LCD_ORIENTATION_LANDSCAPE_4PIN_LEFT, Inter_12);
     inUI.lcdDrawImage(0, 0, width, height, LaunchScreen);
-    inUI.setTitleBarColors(aerospace_orange, LCD_WHITE, LCD_BLACK, aerospace_orange);
-    inUI.setMenuColors(LCD_BLACK, aerospace_orange, LCD_BLACK, LCD_DARKGREY, LCD_WHITE);
+    inUI.setTitleBarColors(aerospace_orange, ghost_white, LCD_BLACK, aerospace_orange);
+    inUI.setMenuColors(LCD_BLACK, aerospace_orange, LCD_BLACK, dim_gray, ghost_white);
 }
 
 void ZGDisplay::refresh(TeensyUserInterface& inUI, MENU_ITEM* inMainMenu)
@@ -90,6 +90,33 @@ void ZGDisplay::plotObjects(TeensyUserInterface& inUI, bool inRedrawAll)
         inUI.lcdClearScreen(LCD_BLACK);
         inUI.drawButton(mMenuButton);
 
+        inUI.lcdSetFont(Inter_9);
+        inUI.lcdSetFontColor(cadet_gray);
+
+        inUI.lcdSetCursorXY(71, 7);
+        inUI.lcdPrintRightJustified("Scale");
+
+        inUI.lcdSetCursorXY(249, 7);
+        inUI.lcdPrint("Max Range");
+
+        inUI.lcdSetCursorXY(67, 199);
+        inUI.lcdPrintRightJustified("Mode");
+
+        inUI.lcdSetFont(Inter_11);
+        inUI.lcdSetFontColor(ghost_white);
+
+        inUI.lcdSetCursorXY(71, 23);
+        inUI.lcdPrintRightJustified("Chromatic");
+
+        inUI.lcdSetCursorXY(249, 23);
+        inUI.lcdPrint((int)mObjectTracker->getMaxDistance());
+        inUI.lcdPrint("cm");
+
+        inUI.lcdSetCursorXY(67, 215);
+        inUI.lcdPrintRightJustified("DBSCAN");
+
+
+
     } else { // Erase previous data
         auto clusters = mDisplayedClusters;
         for (const auto &cluster: clusters) {
@@ -107,7 +134,7 @@ void ZGDisplay::plotObjects(TeensyUserInterface& inUI, bool inRedrawAll)
     }
 
     inUI.lcdDrawFilledCircle(center_x, center_y, 2, aerospace_orange);
-    inUI.lcdDrawCircle(center_x, center_y, center_y - 1, LCD_DARKGREY);
+    inUI.lcdDrawCircle(center_x, center_y, center_y - 1, dim_gray);
 
     // Paint new data
     auto clusters = mObjectTracker->getClusters();
