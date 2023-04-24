@@ -57,6 +57,7 @@ private:
     int newMidiNote = 0;
     int mMidiChannel = 1;
     int modValue = 0;
+    int timbreValue = 63;
 
     int mRootNote = 48; //C3
     int mScaleType = 0; //Chromatic

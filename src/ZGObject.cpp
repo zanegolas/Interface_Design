@@ -112,6 +112,7 @@ void ZGObject::_calculateMidi(){
     }
     newMidiNote = degree + mRootNote;
     modValue = 127 - static_cast<int>(mDistance * mod_factor);
+    timbreValue = static_cast<int>(mSpeed * 64.f / 70.f) + 63;
 }
 
 void ZGObject::_playMidi(){
@@ -123,6 +124,7 @@ void ZGObject::_playMidi(){
         usbMIDI.sendNoteOn(currentMidiNote, 127, mMidiChannel);
     }
     usbMIDI.sendControlChange( 1, modValue, mMidiChannel);
+    usbMIDI.sendControlChange(74, timbreValue, mMidiChannel);
 }
 
 const float &ZGObject::getX() const {
