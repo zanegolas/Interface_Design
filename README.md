@@ -1,5 +1,9 @@
 # MPE LiDAR Midi Interface
 
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=Cmb0zN6hiA8
+" target="_blank"><img src="http://img.youtube.com/vi/Cmb0zN6hiA8/0.jpg" 
+alt="Final Presentation Video" width="560" height="315" border="10" /></a>
+
 ### Purpose
 This device tracks objects within a given range and translates their position over time into midi data for use with any device that accepts USB Midi. It is easily reproducable with 3D printing and commonly available parts. The device is designed to run without any reprogramming by the end user, but the open source nature allows for deep customization if you so choose.
 
