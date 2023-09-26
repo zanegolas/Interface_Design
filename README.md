@@ -77,7 +77,7 @@ This project uses Platform.IO and CLion, though VSCode shouldn't be an issue. Th
 
 - __ZGLidar__ : Handles management of the physical lidar device and pulling data off the serial buffer.
 - __ZGObjectTracker__ : This analyzes point cloud data from the lidar and attempts to match objects positions over time. Holds all tracked objects and tells them when they are no longer relevant
-- __ZGObject__ : Represents a tracked point and manages all midi updates and signals throughout it's lifetime. It only reuires updated coordinates to derive further parameters that it needs to send
+- __ZGObject__ : Represents a tracked point and manages all midi updates and signals throughout it's lifetime. It only requires updated coordinates to derive further parameters that it needs to send
 - __ZGDisplay__ : This manages the realtime data display and touch screen menu
 - __ZGConversionHelpers__ : Inline functions that are useful in multiple objects
 
